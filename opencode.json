@@ -1,0 +1,10 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "plugin": ["opencode-skills"],
+  "model": "github-copilot/claude-opus-4.5",
+  "small_model": "github-copilot/claude-haiku-4.5",
+  "tools": {
+    "skills_*": false,
+    "skills_weather": true
+  }
+}
