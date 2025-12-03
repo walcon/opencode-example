@@ -26,13 +26,13 @@ Restart OpenCode after cloning this repo to load everything.
 
 ## Examples
 
-### Primary Agent: eli5
+### Primary Agent: ask
 
-**Location:** `.opencode/agent/eli5.md`
+**Location:** `.opencode/agent/ask.md`
 
-Explains everything in simple terms, like you're explaining to a 5-year-old.
+A read-only codebase explorer. Ask questions about the codebase without making changes.
 
-**Usage:** Press `Tab` to switch to the eli5 agent, then ask anything.
+**Usage:** Press `Tab` to switch to the ask agent, then ask anything about the codebase.
 
 ### Subagent: copywriter
 
@@ -42,13 +42,13 @@ Writes user-facing copy (headlines, descriptions, CTAs). Demonstrates how the pr
 
 **Usage:** Type `@copywriter write a headline for our new feature` or let the primary agent spawn it for copy-related tasks.
 
-### Command: /ask
+### Command: /eli5
 
-**Location:** `.opencode/command/ask.md`
+**Location:** `.opencode/command/eli5.md`
 
-Ask questions about the codebase without making changes. Uses the `plan` agent which has restricted permissions.
+Explains concepts in simple terms, like you're explaining to a 5-year-old.
 
-**Usage:** `/ask how does authentication work in this project?`
+**Usage:** `/eli5 what is a database?`
 
 ### Skill: weather
 
@@ -97,9 +97,9 @@ Each agent/command can use a different model to optimize quota usage:
 |-----------|-------|-----------|
 | Default | `claude-opus-4.5` | Complex tasks need capability |
 | `small_model` | `claude-haiku-4.5` | Title generation, lightweight tasks |
-| eli5 agent | `claude-haiku-4.5` | Simple explanations, fast & cheap |
+| ask agent | `claude-haiku-4.5` | Read-only analysis, lower cost |
 | copywriter | `gpt-5` | Creative writing benefits from GPT |
-| /ask command | `claude-haiku-4.5` | Read-only analysis, lower cost |
+| /eli5 command | `claude-haiku-4.5` | Simple explanations, fast & cheap |
 
 Set models in frontmatter (`model: provider/model-name`) or in `opencode.json`.
 
