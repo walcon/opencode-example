@@ -292,8 +292,212 @@ npx tsx scripts/validate.ts .opencode/agent/code-reviewer.md
 
 ---
 
+## Permission Patterns
+
+OpenCode supports granular bash command permissions. Use these patterns for fine-grained control.
+
+### Permission Levels
+
+| Level | Behavior |
+|-------|----------|
+| `allow` | Execute without approval |
+| `ask` | Prompt for approval |
+| `deny` | Block the command entirely |
+
+### Read-Only Agent
+
+```yaml
+---
+description: Code analyzer that never modifies files
+mode: subagent
+tools:
+  write: false
+  edit: false
+  bash: false
+---
+```
+
+### Git-Allowed Agent
+
+Allow git read commands, require approval for writes:
+
+```yaml
+---
+description: Git operations specialist
+mode: subagent
+permission:
+  bash:
+    "git status": allow
+    "git diff": allow
+    "git log*": allow
+    "git show*": allow
+    "git branch*": ask
+    "git checkout*": ask
+    "git push*": ask
+    "git commit*": ask
+    "*": deny
+---
+```
+
+### Package Management Agent
+
+```yaml
+---
+description: Dependency analyzer
+mode: subagent
+permission:
+  bash:
+    "npm list*": allow
+    "npm outdated*": allow
+    "npm audit*": allow
+    "npm install*": ask
+    "npm update*": ask
+    "*": deny
+---
+```
+
+### Security-Conscious Agent
+
+Maximum restrictions for audit tasks:
+
+```yaml
+---
+description: Security auditor with minimal permissions
+mode: subagent
+tools:
+  write: false
+  edit: false
+  bash: false
+  webfetch: false
+permission:
+  edit: deny
+  bash: deny
+---
+```
+
+---
+
+## MCP Tools Configuration
+
+When MCP servers are configured, agents can access external services.
+
+### Enabling MCP Tools
+
+```yaml
+---
+description: GitHub integration specialist
+mode: subagent
+tools:
+  mymcp_github_create_issue: true
+  mymcp_github_list_prs: true
+  mymcp_slack_post_message: false
+---
+```
+
+### Common MCP Patterns
+
+| MCP Server | Tools | Use Case |
+|------------|-------|----------|
+| github | `mymcp_github_*` | Issue/PR management |
+| slack | `mymcp_slack_*` | Notifications |
+| notion | `mymcp_notion_*` | Documentation |
+| linear | `mymcp_linear_*` | Project tracking |
+
+### Per-Agent MCP Access
+
+In `opencode.json`, configure MCP access per agent:
+
+```json
+{
+  "agent": {
+    "github-helper": {
+      "tools": {
+        "mymcp_github_create_issue": true,
+        "mymcp_github_create_pr": true
+      }
+    }
+  }
+}
+```
+
+---
+
+## Integration with prompt-engineer
+
+For complex agents requiring high-quality system prompts, use the `prompt-engineer` skill.
+
+### Workflow
+
+```
+1. Invoke agent-architect for agent creation
+2. agent-architect invokes prompt-engineer for system prompt
+3. prompt-engineer runs 5-phase methodology:
+   - Requirements gathering
+   - Structure design  
+   - Prompt construction
+   - Validation
+   - Output generation
+4. prompt-engineer returns optimized prompt body
+5. agent-architect wraps with agent frontmatter
+6. Final agent.md created
+```
+
+### When to Use prompt-engineer
+
+| Agent Complexity | Approach |
+|------------------|----------|
+| Simple agent | Use template directly |
+| Standard agent | Follow Step 5 guidelines |
+| Complex/critical agent | Invoke `prompt-engineer` skill |
+
+### Invoking prompt-engineer
+
+When you need a high-quality system prompt:
+
+```
+Use the prompt-engineer skill to create a system prompt for this agent.
+
+Requirements:
+- Task: [what the agent does]
+- Input: [what it receives]
+- Output: [expected format]
+- Constraints: [limitations]
+```
+
+---
+
+## Agent Quality Metrics
+
+Evaluate agents against these criteria:
+
+| Criterion | Weight | Description |
+|-----------|--------|-------------|
+| Single Responsibility | 25% | Does one thing well |
+| Minimal Permissions | 25% | Only necessary tool access |
+| Clear Triggers | 20% | Description enables auto-invocation |
+| Documented Scope | 15% | Boundaries clearly defined |
+| Structured Output | 15% | Consistent, parseable responses |
+
+### Quality Checklist
+
+Before deploying an agent:
+
+- [ ] Description clearly states when to use
+- [ ] Tools are minimal for the task
+- [ ] Output format is specified
+- [ ] Edge cases are handled
+- [ ] Constraints are explicit
+- [ ] No conflicting instructions
+
+---
+
 ## Examples
 
 See `references/examples/` for annotated agents:
 - **code-reviewer.md** - Read-only analysis agent
 - **researcher.md** - Research with web access
+
+See `references/patterns.md` for additional archetypes:
+- **Orchestrator** - Coordinates multiple agents
+- **Permission patterns** - Granular bash control
+- **MCP integration** - External service access

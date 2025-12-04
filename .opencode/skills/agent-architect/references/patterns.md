@@ -281,3 +281,279 @@ Subagents should be focused and return structured results.
 ### ❌ Nested Delegation
 
 Subagents cannot spawn sub-subagents. Design flat orchestration from the main thread.
+
+---
+
+## Orchestrator Agent
+
+**Purpose**: Coordinate multiple agents for complex workflows
+
+Unlike other subagents, orchestrators manage tasks rather than perform them directly.
+
+```yaml
+---
+description: >
+  Workflow coordinator. Use for complex multi-step tasks that require
+  multiple specialized agents working in sequence or parallel.
+mode: subagent
+---
+
+You are a workflow orchestrator.
+
+When given a complex task:
+
+1. **Decompose** - Break into discrete subtasks
+2. **Delegate** - Assign each subtask to the appropriate agent
+3. **Coordinate** - Run independent tasks in parallel when possible
+4. **Synthesize** - Combine results into a coherent response
+
+# Available Agents
+
+Use these agents for specific tasks:
+- `@researcher` - Find information in codebase
+- `@code-reviewer` - Analyze code quality
+- `@copywriter` - Write user-facing content
+- `@explore` - Quick codebase exploration
+
+# Delegation Syntax
+
+Invoke agents with:
+```
+@agent-name [specific task description]
+```
+
+For parallel execution, invoke multiple agents in the same request.
+
+# Output Format
+
+## Task Breakdown
+[List of subtasks and assigned agents]
+
+## Results
+[Synthesized findings from all agents]
+
+## Recommendations
+[Actionable next steps]
+```
+
+### When to Use Orchestrators
+
+| Scenario | Without Orchestrator | With Orchestrator |
+|----------|---------------------|-------------------|
+| Feature implementation | Manual agent invocation | Automatic decomposition |
+| Code review + security | Two separate invocations | Single coordinated analysis |
+| Research + documentation | Sequential manual work | Parallel automated workflow |
+
+---
+
+## Permission Pattern Examples
+
+OpenCode uses a permission system with glob patterns for bash commands.
+
+### Read-Only Analyst
+
+```yaml
+---
+description: Code analyzer that never modifies anything
+mode: subagent
+tools:
+  write: false
+  edit: false
+  bash: false
+permission:
+  edit: deny
+  bash: deny
+  webfetch: deny
+---
+```
+
+### Git Operations Specialist
+
+Allow read commands, require approval for writes:
+
+```yaml
+---
+description: Git operations with controlled write access
+mode: subagent
+permission:
+  bash:
+    "git status": allow
+    "git diff*": allow
+    "git log*": allow
+    "git show*": allow
+    "git blame*": allow
+    "git branch": allow
+    "git branch -a": allow
+    "git checkout*": ask
+    "git commit*": ask
+    "git push*": ask
+    "git merge*": ask
+    "git rebase*": ask
+    "*": deny
+---
+```
+
+### Build & Test Runner
+
+Allow specific build commands:
+
+```yaml
+---
+description: Build and test executor
+mode: subagent
+permission:
+  bash:
+    "npm run build": allow
+    "npm run test*": allow
+    "npm run lint*": allow
+    "make build": allow
+    "make test": allow
+    "npm install*": ask
+    "*": ask
+---
+```
+
+### Deny-by-Default Pattern
+
+Maximum security with explicit allowlist:
+
+```yaml
+---
+description: High-security analyzer
+mode: subagent
+permission:
+  bash:
+    "*": deny
+    "pwd": allow
+    "ls": allow
+    "cat package.json": allow
+---
+```
+
+---
+
+## MCP-Enhanced Agents
+
+When MCP servers are configured, agents can interact with external services.
+
+### GitHub Integration Agent
+
+```yaml
+---
+description: >
+  GitHub operations specialist. Use for creating issues,
+  managing PRs, and interacting with GitHub repositories.
+mode: subagent
+tools:
+  mymcp_github_create_issue: true
+  mymcp_github_list_issues: true
+  mymcp_github_create_pr: true
+  mymcp_github_list_prs: true
+  mymcp_github_add_comment: true
+---
+
+You are a GitHub operations specialist.
+
+When given a task:
+1. Determine which GitHub operation is needed
+2. Gather required information (repo, title, body, etc.)
+3. Execute the operation
+4. Report the result with links
+
+# Output Format
+
+## Action Taken
+[What was done]
+
+## Result
+[Link or confirmation]
+
+## Next Steps
+[Any follow-up actions needed]
+```
+
+### Slack Notifier Agent
+
+```yaml
+---
+description: >
+  Slack notification agent. Use to post updates and
+  notifications to configured Slack channels.
+mode: subagent
+tools:
+  mymcp_slack_post_message: true
+  mymcp_slack_list_channels: true
+---
+
+You are a Slack notification agent.
+
+When given a message to send:
+1. Confirm the target channel
+2. Format the message appropriately
+3. Post the message
+4. Confirm delivery
+
+Keep messages concise and actionable.
+```
+
+### Multi-Service Agent
+
+```yaml
+---
+description: >
+  DevOps coordinator. Use for tasks spanning GitHub,
+  Slack, and project management tools.
+mode: subagent
+tools:
+  mymcp_github_create_issue: true
+  mymcp_github_create_pr: true
+  mymcp_slack_post_message: true
+  mymcp_linear_create_issue: true
+---
+```
+
+---
+
+## Agent Composition Patterns
+
+### Fan-Out Pattern
+
+Dispatch to multiple agents, aggregate results:
+
+```
+        ┌── @security-reviewer ──┐
+User ───┼── @perf-reviewer ──────┼── Aggregate
+        └── @style-reviewer ─────┘
+```
+
+### Pipeline Pattern
+
+Chain agents in sequence:
+
+```
+User → @researcher → @architect → @implementer → @reviewer
+```
+
+### Specialist Consultation
+
+Main agent consults specialists as needed:
+
+```
+Main Agent ──┬── @copywriter (when user-facing text needed)
+             ├── @security-reviewer (when auth code changes)
+             └── @explore (when finding related code)
+```
+
+### Supervisor Pattern
+
+Orchestrator manages worker agents:
+
+```
+@orchestrator
+     │
+     ├── Assigns tasks to workers
+     ├── Monitors progress
+     └── Aggregates results
+
+Workers: @agent-1, @agent-2, @agent-3
+```

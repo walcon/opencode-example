@@ -1,0 +1,746 @@
+# PRD: Prompt Engineering & Agent Creation Skills
+
+> **Version:** 1.0.0  
+> **Date:** 2024-12-04  
+> **Status:** Draft  
+> **Author:** Conny @ Polestar
+
+---
+
+## Executive Summary
+
+This PRD defines two interconnected Claude Skills for creating high-quality prompts and AI agents:
+
+1. **`prompt-engineer`** — Systematic prompt creation using proven frameworks
+2. **`agent-architect`** — Design and generate Claude Code agents with proper configuration
+
+**Target Platform:** Claude only (Desktop, Code, API)  
+**Output Format:** Markdown files with YAML frontmatter (prompts/agents/skills)  
+**Script Language:** TypeScript (unless heavy data processing requires Python)
+
+Note: Prompts themselves may use XML tags for structure (Claude's preferred format) and JSON for structured data. The constraint is that deliverable *files* use `.md` with YAML frontmatter.
+
+These skills follow Anthropic's Agent Skills specification (SKILL.md format) and incorporate best practices from existing implementations including the [claude-code-skill-factory](https://github.com/alirezarezvani/claude-code-skill-factory) and Anthropic's official documentation.
+
+---
+
+## Research Summary
+
+### Existing Implementations Reviewed
+
+| Project | Strengths | Gaps |
+|---------|-----------|------|
+| **claude-code-skill-factory** | 69 role presets, 7-question flow, multi-format output | Overly complex, 427KB prompt-factory |
+| **Anthropic skill-creator** | Official patterns, progressive disclosure | Generic, lacks prompt-specific guidance |
+| **OpenSkills** | Cross-agent compatibility | Loader only, no content |
+
+### Key Design Insights
+
+1. **Progressive Disclosure** — Load minimal metadata first, expand on invocation
+2. **Structured Templates** — Consistent XML tag patterns in prompts improve reliability
+3. **Quality Gates** — Validation before delivery prevents poor outputs
+4. **Markdown + YAML Frontmatter** — All deliverables as `.md` files, version-controllable, human-readable
+
+---
+
+## Skill 1: `prompt-engineer`
+
+### Purpose
+
+Create production-ready prompts using systematic methodology. Transforms vague requirements into structured, tested prompts.
+
+### File Structure
+
+```
+prompt-engineer/
+├── SKILL.md                    # Core instructions (~400 lines)
+├── LICENSE.txt
+├── references/
+│   ├── prompt-patterns.md      # Common patterns library
+│   ├── anti-patterns.md        # What to avoid
+│   └── evaluation-rubric.md    # Quality scoring criteria
+├── scripts/
+│   └── validate-prompt.ts      # Syntax/structure validation
+└── assets/
+    └── prompt-template.md      # Prompt file template with YAML frontmatter
+```
+
+### SKILL.md Specification
+
+```yaml
+---
+name: prompt-engineer
+description: >
+  Create production-ready prompts using systematic methodology. Use when:
+  (1) Building new prompts for Claude,
+  (2) Improving or debugging existing prompts,
+  (3) Creating prompt templates for repeated use,
+  (4) Designing system prompts for agents.
+allowed-tools: "Read,Write,Edit,Bash"
+version: 1.0.0
+---
+```
+
+### Core Methodology
+
+#### Phase 1: Requirements Gathering (5 Questions)
+
+```markdown
+## Step 1: Gather Requirements
+
+Ask the user these questions (adapt based on context):
+
+1. **TASK**: What specific task should the prompt accomplish?
+   - Be precise: "summarize documents" → "summarize legal contracts into 3-bullet executive summaries"
+
+2. **CONTEXT**: What information will be available at runtime?
+   - Input data format and sources
+   - User/system context provided
+   - Available tools or actions
+
+3. **OUTPUT**: What should the output look like?
+   - Format (JSON, markdown, prose, code)
+   - Length constraints
+   - Required sections or fields
+
+4. **CONSTRAINTS**: What rules must be followed?
+   - Tone/style requirements
+   - Safety considerations
+   - Domain-specific requirements
+
+5. **EDGE CASES**: What could go wrong?
+   - Missing or malformed input
+   - Ambiguous requests
+   - Out-of-scope queries
+```
+
+#### Phase 2: Structure Design
+
+```markdown
+## Step 2: Design Prompt Structure
+
+Based on requirements, select appropriate pattern:
+
+### Pattern: Direct Instruction
+- Best for: Simple, single-step tasks
+- Structure: Role → Task → Output format
+
+### Pattern: Chain of Thought
+- Best for: Reasoning, analysis, multi-step problems
+- Structure: Role → Task → "Think step by step" → Output
+
+### Pattern: Few-Shot
+- Best for: Format-specific outputs, classification
+- Structure: Role → Examples (input/output pairs) → Task
+
+### Pattern: ReAct (Reason + Act)
+- Best for: Tool-using agents, research tasks
+- Structure: Role → Available actions → Thought/Action/Observation loop
+
+### Pattern: Constitutional
+- Best for: Tasks requiring value alignment, moderation
+- Structure: Role → Principles → Task → Self-check against principles
+```
+
+#### Phase 3: Prompt Construction
+
+```markdown
+## Step 3: Construct the Prompt
+
+Build prompt following this hierarchy:
+
+### 1. Identity Block (Required)
+Define WHO the AI is:
+- Role and expertise
+- Behavioral characteristics
+- Communication style
+
+### 2. Context Block (If applicable)
+Provide WHAT information is available:
+- Use XML tags for structure: <context>, <document>, <history>
+- Reference variables with clear naming: {{USER_INPUT}}, {{DOCUMENT}}
+
+### 3. Instructions Block (Required)
+Specify HOW to perform the task:
+- Numbered steps for complex procedures
+- Bullet points for guidelines
+- Imperative voice ("Analyze..." not "You should analyze...")
+
+### 4. Output Block (Required)
+Define the expected output:
+- Format specification (JSON schema, markdown structure)
+- Length guidance
+- Required vs optional fields
+
+### 5. Examples Block (Optional but recommended)
+Show concrete input/output pairs:
+- 2-3 examples for few-shot
+- Cover normal and edge cases
+- Use <example> tags for clarity
+
+### 6. Guardrails Block (If needed)
+Set boundaries:
+- What NOT to do
+- How to handle edge cases
+- Fallback behaviors
+```
+
+#### Phase 4: Validation
+
+```markdown
+## Step 4: Validate Prompt
+
+Run quality checks:
+
+### Structural Validation
+- [ ] Has clear identity/role
+- [ ] Instructions use imperative voice
+- [ ] Output format is specified
+- [ ] Variables are consistently named
+
+### Content Validation  
+- [ ] No ambiguous instructions
+- [ ] Edge cases addressed
+- [ ] Examples match output spec
+- [ ] Length appropriate (under 4000 tokens recommended)
+
+### Safety Validation
+- [ ] No harmful capabilities enabled
+- [ ] Appropriate refusal patterns included
+- [ ] Privacy considerations addressed
+
+Present validation results to user before finalizing.
+```
+
+#### Phase 5: Output Generation
+
+```markdown
+## Step 5: Generate Final Prompt
+
+Create prompt as Markdown file with YAML frontmatter. Use Claude XML tags for internal structure:
+
+### Internal Structure: Claude XML Tags
+Structure prompt content with clear XML tags:
+- `<role>` — Identity and expertise
+- `<context>` — Runtime information
+- `<instructions>` — Task steps
+- `<output>` — Expected format
+- `<examples>` — Input/output pairs
+- `<guardrails>` — Boundaries and edge cases
+
+Use {baseDir}/assets/prompt-template.md as reference.
+
+### Deliverables
+1. Complete prompt as `.md` file with YAML frontmatter (saved to user's specified location)
+2. Brief usage guide (when to use, how to customize)
+3. Test inputs for validation (can be YAML or JSON as appropriate)
+```
+
+### Reference Files
+
+#### `references/prompt-patterns.md`
+
+```markdown
+# Prompt Pattern Library
+
+## Pattern 1: Persona + Task + Format (PTF)
+The simplest effective pattern. Works for 80% of use cases.
+
+**Template:**
+```
+You are a [ROLE] with expertise in [DOMAIN].
+
+Your task is to [SPECIFIC ACTION] based on the provided [INPUT TYPE].
+
+Respond in [FORMAT] with the following structure:
+[OUTPUT SPECIFICATION]
+```
+
+## Pattern 2: Context + Objective + Style + Tone (COST)
+For content generation requiring specific voice.
+
+## Pattern 3: Situation + Task + Action + Result (STAR)
+For complex multi-step reasoning tasks.
+
+## Pattern 4: Role + Rules + Examples + Task (RRET)
+For tasks requiring strict adherence to guidelines.
+
+[... additional patterns ...]
+```
+
+#### `references/anti-patterns.md`
+
+```markdown
+# Prompt Anti-Patterns to Avoid
+
+## ❌ Vague Instructions
+BAD: "Make it good"
+GOOD: "Use active voice, limit sentences to 20 words, include specific metrics"
+
+## ❌ Conflicting Requirements
+BAD: "Be concise but cover everything in detail"
+GOOD: "Prioritize the 3 most important points, expand on each in 2-3 sentences"
+
+## ❌ Missing Output Format
+BAD: "Analyze this data"
+GOOD: "Analyze this data and return a JSON object with keys: summary, key_findings, recommendations"
+
+## ❌ Instruction Overload
+BAD: 50+ rules in a single prompt
+GOOD: Core rules in prompt, extended guidelines as reference document
+
+## ❌ No Edge Case Handling
+BAD: Assumes perfect input
+GOOD: "If [X] is missing, respond with: 'I need [X] to complete this analysis'"
+```
+
+---
+
+## Skill 2: `agent-architect`
+
+### Purpose
+
+Design and generate Claude Code agents (sub-agents) with proper YAML frontmatter, tool configurations, and behavioral specifications.
+
+### File Structure
+
+```
+agent-architect/
+├── SKILL.md                    # Core instructions (~350 lines)
+├── LICENSE.txt
+├── references/
+│   ├── tool-patterns.md        # Common tool combinations
+│   ├── agent-types.md          # Agent archetypes and use cases
+│   └── mcp-integration.md      # MCP server integration guide
+├── scripts/
+│   └── init-agent.ts           # Agent file generator
+└── assets/
+    ├── template-agent.md       # Agent .md template
+    └── frontmatter-schema.yaml # Valid frontmatter fields
+```
+
+### SKILL.md Specification
+
+```yaml
+---
+name: agent-architect
+description: >
+  Design and generate Claude Code agents (sub-agents) with proper configuration.
+  Use when: (1) Creating new specialized agents, (2) Converting prompts to agents,
+  (3) Setting up multi-agent workflows, (4) Configuring tool access and permissions.
+allowed-tools: "Read,Write,Edit,Bash,Glob"
+version: 1.0.0
+---
+```
+
+### Core Methodology
+
+#### Phase 1: Agent Discovery
+
+```markdown
+## Step 1: Understand Agent Requirements
+
+Gather information through focused questions:
+
+1. **MISSION**: What is this agent's primary responsibility?
+   - Single, clear purpose (agents should do one thing well)
+   - Example: "Code review specialist" not "General development helper"
+
+2. **TRIGGERS**: When should Claude invoke this agent?
+   - Specific task types
+   - Keywords or patterns
+   - Context indicators
+
+3. **CAPABILITIES**: What tools does this agent need?
+   - Read/Write for file operations
+   - Bash for command execution
+   - Specific scoped commands (e.g., `Bash(git:*)`)
+   - MCP tools for external services
+
+4. **MODEL**: What intelligence level is required?
+   - `sonnet` (default) — Balanced speed/capability
+   - `opus` — Complex reasoning, high-stakes decisions
+   - `haiku` — Fast, simple operations
+   - `inherit` — Use session's model
+
+5. **WORKFLOW**: How does this agent operate?
+   - Autonomous execution
+   - Human-in-the-loop checkpoints
+   - Collaboration with other agents
+```
+
+#### Phase 2: Agent Design
+
+```markdown
+## Step 2: Design Agent Architecture
+
+### Agent Type Classification
+
+Select the appropriate archetype:
+
+**Specialist Agent**
+- Deep expertise in narrow domain
+- Examples: code-reviewer, security-auditor, test-writer
+- Tools: Domain-specific, minimal
+
+**Orchestrator Agent**  
+- Coordinates other agents
+- Examples: project-manager, workflow-coordinator
+- Tools: Agent, Task, broad Read access
+
+**Research Agent**
+- Information gathering and synthesis
+- Examples: doc-researcher, api-investigator
+- Tools: Read, Grep, WebSearch, WebFetch
+
+**Builder Agent**
+- Creates artifacts
+- Examples: component-generator, doc-writer
+- Tools: Write, Edit, Bash (scoped)
+
+### Tool Access Patterns
+
+Design minimal necessary permissions:
+
+```yaml
+# File operations only
+tools: Read, Write, Edit
+
+# Git-scoped Bash
+tools: Read, Write, Bash(git:*)
+
+# Full development capability
+tools: Read, Write, Edit, Bash, Glob, Grep
+
+# External integrations
+tools: Read, Write, mcp__github, mcp__slack
+```
+```
+
+#### Phase 3: System Prompt Construction
+
+```markdown
+## Step 3: Write Agent System Prompt
+
+Structure the agent's instructions:
+
+### Identity Section
+```markdown
+You are [AGENT_NAME], a specialized [DOMAIN] agent.
+
+## Core Mission
+[Single paragraph defining primary purpose]
+
+## Expertise
+- [Specific skill 1]
+- [Specific skill 2]
+- [Specific skill 3]
+```
+
+### Behavioral Guidelines
+```markdown
+## Operating Principles
+1. [Principle about quality]
+2. [Principle about communication]
+3. [Principle about scope boundaries]
+
+## Workflow
+[Step-by-step process this agent follows]
+
+## Output Standards
+[How this agent formats its outputs]
+```
+
+### Boundaries and Handoffs
+```markdown
+## Scope Boundaries
+This agent DOES:
+- [In-scope activity 1]
+- [In-scope activity 2]
+
+This agent does NOT:
+- [Out-of-scope activity 1]
+- [Out-of-scope activity 2]
+
+## Escalation
+When [condition], hand off to [other agent/human] by [method].
+```
+```
+
+#### Phase 4: Generate Agent File
+
+```markdown
+## Step 4: Generate Agent Configuration
+
+Create the agent .md file with proper frontmatter:
+
+### Frontmatter Schema
+```yaml
+---
+name: agent-name            # kebab-case, required
+description: Brief desc     # Triggers auto-invocation, required
+tools: Read, Write, Edit    # Comma-separated, required
+model: sonnet               # sonnet|opus|haiku|inherit, optional
+color: blue                 # UI color, optional
+field: backend              # Domain hint, optional
+expertise: expert           # Proficiency level, optional
+mcp_tools: mcp__github      # External MCP integrations, optional
+---
+```
+
+### File Generation
+
+Run: `npx ts-node {baseDir}/scripts/init-agent.ts <agent-name> --path <output>`
+
+Or create manually at:
+- Project: `.claude/agents/<agent-name>.md`
+- User: `~/.claude/agents/<agent-name>.md`
+```
+
+### Reference Files
+
+#### `references/agent-types.md`
+
+```markdown
+# Agent Archetypes
+
+## Code Quality Agents
+| Name | Description | Tools |
+|------|-------------|-------|
+| code-reviewer | Reviews PRs for quality, bugs, style | Read, Grep |
+| security-auditor | Scans for vulnerabilities | Read, Grep, Bash(npm audit:*) |
+| test-writer | Generates unit/integration tests | Read, Write, Bash(npm test:*) |
+
+## Documentation Agents
+| Name | Description | Tools |
+|------|-------------|-------|
+| doc-generator | Creates docs from code | Read, Write |
+| api-documenter | Generates API reference | Read, Write, Grep |
+| readme-writer | Creates/updates READMEs | Read, Write, Edit |
+
+## Research Agents
+| Name | Description | Tools |
+|------|-------------|-------|
+| dependency-analyst | Analyzes package dependencies | Read, Bash(npm:*), Grep |
+| codebase-explorer | Maps and explains codebases | Read, Grep, Glob |
+| issue-researcher | Investigates bugs with context | Read, Grep, Bash(git log:*) |
+
+## Builder Agents
+| Name | Description | Tools |
+|------|-------------|-------|
+| component-scaffolder | Generates component boilerplate | Read, Write |
+| migration-writer | Creates database migrations | Read, Write |
+| config-generator | Creates config files from templates | Read, Write |
+```
+
+#### `references/tool-patterns.md`
+
+```markdown
+# Tool Access Patterns
+
+## Minimal Read-Only
+For analysis and review tasks:
+```yaml
+tools: Read, Grep
+```
+
+## Standard Development
+For most coding tasks:
+```yaml
+tools: Read, Write, Edit, Bash, Glob, Grep
+```
+
+## Git-Scoped
+For version control operations:
+```yaml
+tools: Read, Bash(git:*), Grep
+```
+
+## Package Management
+For dependency tasks:
+```yaml
+tools: Read, Write, Bash(npm:*), Bash(pip:*)
+```
+
+## MCP-Enhanced
+For external service integration:
+```yaml
+tools: Read, Write, mcp__github, mcp__slack, mcp__notion
+```
+
+## Security-Conscious
+Limited execution, audit-friendly:
+```yaml
+tools: Read, Grep
+allowed-tools: "Read,Grep"  # Explicit pre-approval
+```
+```
+
+---
+
+## Skill Interaction
+
+The two skills are designed to work together:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                     User Request                                 │
+└─────────────────────┬───────────────────────────────────────────┘
+                      │
+         ┌────────────┴────────────┐
+         ▼                         ▼
+┌─────────────────────┐   ┌─────────────────────┐
+│  prompt-engineer    │   │  agent-architect    │
+│  ───────────────    │   │  ────────────────   │
+│  Creates prompts    │   │  Creates agents     │
+│  for any LLM task   │   │  for Claude Code    │
+└─────────┬───────────┘   └─────────┬───────────┘
+          │                         │
+          │   ┌─────────────────┐   │
+          └──►│  Agent needs    │◄──┘
+              │  system prompt  │
+              │  ───────────────│
+              │  prompt-engineer│
+              │  generates it   │
+              └─────────────────┘
+```
+
+### Workflow Example
+
+```
+User: "I need an agent that reviews TypeScript code for best practices"
+
+1. Claude invokes `agent-architect`
+2. Agent-architect gathers requirements
+3. Agent-architect determines agent needs a quality system prompt
+4. Agent-architect invokes `prompt-engineer` for the system prompt
+5. Prompt-engineer creates optimized instructions
+6. Agent-architect assembles final agent.md file
+7. User receives complete, tested agent
+```
+
+---
+
+## Installation
+
+### Claude Desktop (claude.ai)
+
+1. Download skill folders
+2. Go to Settings → Skills → Upload Custom Skill
+3. Select each skill folder
+
+### Claude Code
+
+```bash
+# Project-level
+cp -r prompt-engineer .claude/skills/
+cp -r agent-architect .claude/skills/
+
+# User-level (available everywhere)  
+cp -r prompt-engineer ~/.claude/skills/
+cp -r agent-architect ~/.claude/skills/
+```
+
+### Claude API
+
+```typescript
+import Anthropic from "@anthropic-ai/sdk";
+
+const client = new Anthropic();
+
+const response = await client.messages.create({
+  model: "claude-sonnet-4-5-20250929",
+  skills: ["prompt-engineer"], // or skill IDs from /v1/skills
+  messages: [{ role: "user", content: "Create a prompt for..." }],
+});
+```
+
+---
+
+## Quality Criteria
+
+### Prompt Quality Metrics
+
+| Criterion | Weight | Description |
+|-----------|--------|-------------|
+| Clarity | 30% | Instructions are unambiguous |
+| Completeness | 25% | All requirements addressed |
+| Structure | 20% | Proper use of sections, XML tags |
+| Testability | 15% | Easy to validate with examples |
+| Efficiency | 10% | Minimal token usage |
+
+### Agent Quality Metrics
+
+| Criterion | Weight | Description |
+|-----------|--------|-------------|
+| Single Responsibility | 25% | Does one thing well |
+| Minimal Permissions | 25% | Only necessary tool access |
+| Clear Triggers | 20% | Description enables auto-invocation |
+| Documented Scope | 15% | Boundaries clearly defined |
+| Tested Workflow | 15% | Verified with sample tasks |
+
+---
+
+## Implementation Roadmap
+
+### Phase 1: Core Skills (Week 1-2)
+- [ ] Create `prompt-engineer/SKILL.md`
+- [ ] Create `agent-architect/SKILL.md`
+- [ ] Write reference documents
+- [ ] Create asset templates
+
+### Phase 2: Scripts & Validation (Week 3)
+- [ ] Implement `validate-prompt.ts`
+- [ ] Implement `init-agent.ts`
+- [ ] Create test cases
+
+### Phase 3: Testing & Refinement (Week 4)
+- [ ] Test with real prompt requests
+- [ ] Test with real agent creation
+- [ ] Gather feedback, iterate
+- [ ] Document edge cases
+
+### Phase 4: Distribution (Week 5)
+- [ ] Package for Claude Desktop upload
+- [ ] Create installation scripts
+- [ ] Write user documentation
+- [ ] Publish to team/org
+
+---
+
+## Appendix
+
+### A. Sources & References
+
+- [Anthropic Skills Repository](https://github.com/anthropics/skills)
+- [Agent Skills Deep Dive](https://leehanchung.github.io/blogs/2025/10/26/claude-skills-deep-dive/)
+- [Claude Code Skill Factory](https://github.com/alirezarezvani/claude-code-skill-factory)
+- [Anthropic Prompt Engineering Guide](https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/overview)
+- [Agent Skills Engineering Blog](https://anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills)
+
+### B. Frontmatter Reference
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `name` | string | ✓ | kebab-case identifier |
+| `description` | string | ✓ | Triggers discovery, be specific |
+| `allowed-tools` | string | | Pre-approved tools (comma-separated) |
+| `model` | string | | `sonnet`, `opus`, `haiku`, `inherit` |
+| `version` | string | | Semantic version |
+| `license` | string | | License reference |
+| `when_to_use` | string | | Extended trigger description (undocumented) |
+| `disable-model-invocation` | bool | | Prevent auto-invocation |
+| `mode` | bool | | Categorize as mode command |
+
+### C. Token Budget Guidelines
+
+| Component | Recommended Max |
+|-----------|-----------------|
+| SKILL.md total | ~5,000 tokens |
+| Description field | ~100 tokens |
+| Single reference file | ~2,000 tokens |
+| Asset template | ~500 tokens |
+
+---
+
+*End of PRD*
