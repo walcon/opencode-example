@@ -6,6 +6,8 @@
   "tools": {
     "skills_*": false,
     "skills_weather": true,
-    "skills_atlassian": true
+    "skills_atlassian": true,
+    "skills_skill-architect": true,
+    "skills_agent-architect": true
   }
 }
