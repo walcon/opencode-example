@@ -26,6 +26,12 @@
 - Follow security best practices for the language/framework
 - Validate all user inputs and external data
 
-## Skills
+## Skills Plugin
+
+This project uses [opencode-skills](https://github.com/malhashemi/opencode-skills) plugin.
+**Do not search opencode.ai for skills docs** - see `docs/skills.md` instead.
+
+- Skills are tools named `skills_<name>` (e.g., `skills_weather`)
+- Skill definitions: `.opencode/skills/<name>/SKILL.md`
 - `skill-architect` - Create new skills (use `@skill-analyzer` for deep analysis)
 - `agent-architect` - Create new agents/subagents
