@@ -5,6 +5,7 @@
   "small_model": "github-copilot/claude-haiku-4.5",
   "tools": {
     "skills_*": false,
-    "skills_weather": true
+    "skills_weather": true,
+    "skills_atlassian": true
   }
 }

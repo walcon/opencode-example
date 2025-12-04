@@ -25,3 +25,7 @@
 - Never commit secrets, API keys, or sensitive data
 - Follow security best practices for the language/framework
 - Validate all user inputs and external data
+
+## Skills
+- `skill-architect` - Create new skills (use `@skill-analyzer` for deep analysis)
+- `agent-architect` - Create new agents/subagents

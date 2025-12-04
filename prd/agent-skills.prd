@@ -1,0 +1,1002 @@
+# PRD: Skill Architect
+
+A meta-skill for Claude Code that enables expert creation of high-quality skills.
+
+## Problem Statement
+
+Creating effective skills requires deep knowledge of:
+- Skill anatomy and file structure
+- Progressive disclosure patterns
+- Instruction writing best practices
+- LLM prompting techniques
+- Quality validation criteria
+
+This knowledge is scattered and the existing skill-creator provides templates but lacks guidance on *what makes instructions effective for AI agents*.
+
+## Goals
+
+1. Codify best practices for writing AI-agent instructions
+2. Provide pattern library for common skill types
+3. Include quality scoring rubric with actionable feedback
+4. Enable iterative refinement through analysis tools
+5. Package everything in a single, comprehensive skill
+
+## Target Environment
+
+- **Platform**: Claude Code CLI
+- **User**: Developers creating skills for Claude
+
+---
+
+## Context Efficiency: Subagent Integration
+
+### Why Subagents Matter
+
+Skills load into the main context window. For token-heavy operations (analysis, validation, research), this can bloat context and degrade performance. **Subagents solve this** by:
+
+1. Running in **isolated context windows**
+2. Returning only **summaries/results** to the orchestrator
+3. Enabling **parallel execution** (up to 10 concurrent)
+
+### Skills + Subagents Pattern
+
+Skills should delegate heavy operations to subagents:
+
+```markdown
+## Validation Workflow
+
+For comprehensive analysis, delegate to a subagent:
+
+> Use the skill-validator subagent to analyze the skill at <path>
+
+The subagent explores files in its own context and returns only findings.
+```
+
+This keeps the main conversation lean while enabling deep analysis.
+
+---
+
+## Companion Skill: Agent Architect
+
+This PRD defines **two skills** that work in tandem:
+
+| Skill | Purpose |
+|-------|---------|
+| **skill-architect** | Create skills (SKILL.md + resources) |
+| **agent-architect** | Create subagents (.claude/agents/*.md) |
+
+### Why Two Skills?
+
+Skills and agents serve different purposes:
+
+| Aspect | Skills | Subagents |
+|--------|--------|-----------|
+| **Location** | `/mnt/skills/` or project | `.claude/agents/` |
+| **Trigger** | Description matching | Auto-delegation or explicit |
+| **Context** | Loaded into main context | Own isolated context |
+| **Purpose** | Domain knowledge + workflows | Task execution + parallelism |
+| **Output** | Instructions for Claude | Results to orchestrator |
+| **Nesting** | Can reference subagents | Cannot spawn subagents |
+
+### Agent Architect Specification
+
+```yaml
+name: agent-architect
+description: >
+  Expert system for creating Claude Code subagents. Use when: (1) Creating 
+  custom subagents for specialized tasks, (2) Designing multi-agent workflows,
+  (3) Optimizing context usage with delegation, (4) Setting up parallel 
+  execution patterns. Includes agent design patterns, tool selection, and 
+  orchestration strategies.
+```
+
+### Agent Architect Core Content
+
+The agent-architect skill should cover:
+
+#### Subagent Anatomy
+
+```markdown
+## Subagent Definition
+
+Location: `.claude/agents/` (project) or `~/.claude/agents/` (user)
+Format: Markdown with YAML frontmatter
+
+```yaml
+---
+name: code-reviewer
+description: Expert code review. Use PROACTIVELY after code changes.
+tools: Read, Grep, Glob, Bash
+model: sonnet  # or opus, haiku, inherit
+---
+
+You are a senior code reviewer...
+[system prompt continues]
+```
+
+### Key Fields
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `name` | Yes | Unique identifier (kebab-case) |
+| `description` | Yes | When to invoke (triggers auto-delegation) |
+| `tools` | No | Whitelist; omit to inherit all |
+| `model` | No | sonnet/opus/haiku/inherit |
+```
+
+#### Tool Selection Guide
+
+```markdown
+## Tool Access Patterns
+
+| Agent Type | Tools | Rationale |
+|------------|-------|-----------|
+| **Read-only** (reviewers, auditors) | Read, Grep, Glob | Analyze without modifying |
+| **Research** (analysts) | Read, Grep, Glob, WebFetch, WebSearch | Gather information |
+| **Writers** (developers) | Read, Write, Edit, Bash, Glob, Grep | Create and execute |
+| **Minimal** (validators) | Read, Grep | Focused, fast |
+
+**Principle of least privilege**: Only grant tools necessary for the task.
+```
+
+#### Agent Design Patterns
+
+```markdown
+## Agent Patterns
+
+### Pattern 1: Specialist Team
+Multiple focused agents, orchestrated by main thread:
+
+- `architect` - System design decisions
+- `implementer` - Code writing
+- `reviewer` - Quality checks
+- `tester` - Test creation/execution
+
+### Pattern 2: Parallel Analysis
+Fan-out for independent analysis:
+
+> Run style-checker, security-scanner, and test-coverage subagents 
+> in parallel on the codebase
+
+Each returns JSON findings; main thread aggregates.
+
+### Pattern 3: Pipeline
+Sequential handoff with artifacts:
+
+1. `pm-spec` → writes spec.md
+2. `architect-review` → writes adr.md  
+3. `implementer` → writes code
+4. `tester` → validates
+
+Use hooks to trigger next stage.
+
+### Pattern 4: Research Delegation
+Offload context-heavy research:
+
+> Use the explore subagent to find all authentication-related files
+
+Subagent searches extensively; returns only relevant paths.
+```
+
+#### Orchestration Strategies
+
+```markdown
+## Orchestration
+
+### Explicit Invocation
+Direct call with task description:
+
+> Use the code-reviewer subagent to review the changes in src/auth/
+
+### Auto-Delegation
+Claude matches task to description field automatically.
+Write descriptions as "when to use" triggers:
+
+```yaml
+description: >
+  Expert code review specialist. Use PROACTIVELY after code changes 
+  to check security, style, and maintainability.
+```
+
+### Parallelism
+Up to 10 concurrent subagents. Queue additional tasks.
+
+```
+> Create 5 subagents to analyze each service directory in parallel
+```
+
+### Context Handoff
+Pass minimal context to subagents:
+
+> Use the implementer subagent on ticket AUTH-123. 
+> Context: JWT refresh flow, see spec.md for requirements.
+```
+
+#### Anti-Patterns
+
+```markdown
+## Agent Anti-Patterns
+
+### ❌ Over-broad Agents
+Bad: One agent that "handles all code tasks"
+Good: Focused specialists (reviewer, implementer, tester)
+
+### ❌ Too Many Tools
+Bad: Granting all tools "just in case"
+Good: Minimal toolset for the task
+
+### ❌ Vague Descriptions
+Bad: "Helps with code"
+Good: "Expert code review. Use PROACTIVELY after code changes."
+
+### ❌ Missing Output Format
+Bad: Subagent returns unstructured prose
+Good: Specify JSON schema in system prompt
+
+### ❌ Nested Delegation Attempts
+Bad: Expecting subagent to spawn sub-subagents
+Good: Design flat orchestration from main thread
+```
+
+---
+
+## Skill Specification
+
+### Metadata
+
+```yaml
+name: skill-architect
+description: >
+  Expert system for creating high-quality Claude skills. Use when: (1) Creating 
+  new skills from scratch, (2) Analyzing/improving existing skills, (3) Learning 
+  skill design best practices, (4) Debugging why a skill underperforms. Includes 
+  instruction writing patterns, quality rubrics, and iterative refinement workflows.
+```
+
+---
+
+## Core Capabilities
+
+### 1. Skill Creation Workflow
+
+Six-phase process:
+
+| Phase | Purpose | Output |
+|-------|---------|--------|
+| **Discovery** | Understand use cases | Concrete example list |
+| **Architecture** | Choose patterns, plan resources | Skill blueprint |
+| **Scaffold** | Initialize structure | Directory + SKILL.md template |
+| **Implement** | Write instructions + resources | Complete skill |
+| **Validate** | Check quality | Score + issues |
+| **Iterate** | Refine based on testing | Improved skill |
+
+### 2. Instruction Writing Guide
+
+Core principles for writing effective AI instructions.
+
+### 3. Pattern Library
+
+Templates for common skill archetypes.
+
+### 4. Quality Rubric
+
+Scoring system with automated checks.
+
+### 5. Analysis Tools
+
+Scripts for evaluating and improving existing skills.
+
+---
+
+## Detailed Requirements
+
+### R1: Instruction Writing Guide
+
+This is the core intellectual property of the skill. Must cover:
+
+#### R1.1: Foundational Principles
+
+```markdown
+## Writing Instructions for AI Agents
+
+### Principle 1: Claude is Already Smart
+- Don't explain obvious things
+- Focus on what Claude *doesn't* know: proprietary formats, business logic, specific sequences
+- Challenge every sentence: "Does this justify its token cost?"
+
+### Principle 2: Degrees of Freedom
+Match specificity to task fragility:
+
+| Freedom Level | When to Use | Format |
+|---------------|-------------|--------|
+| **High** | Multiple valid approaches, context-dependent | Prose guidelines |
+| **Medium** | Preferred pattern exists, some variation OK | Pseudocode, parameters |
+| **Low** | Fragile operations, consistency critical | Exact scripts, strict templates |
+
+### Principle 3: Show, Don't Tell
+- Concrete examples > abstract descriptions
+- Input/output pairs for format expectations
+- Real error messages with solutions
+
+### Principle 4: Progressive Disclosure
+- SKILL.md = entry point (~500 lines max)
+- References = loaded on demand
+- Scripts = executed without reading
+```
+
+#### R1.2: Instruction Patterns
+
+```markdown
+## Instruction Patterns
+
+### Pattern: Decision Tree
+Use when workflow has branches:
+
+```
+1. Determine the task type:
+   **Creating new?** → Section A
+   **Editing existing?** → Section B
+   **Analyzing?** → Section C
+```
+
+### Pattern: Checklist
+Use for quality gates:
+
+```
+Before proceeding, verify:
+- [ ] Input file exists
+- [ ] Required fields present
+- [ ] Format matches expected schema
+```
+
+### Pattern: Conditional Loading
+Use for variant-specific details:
+
+```
+For AWS deployments, see [aws.md](references/aws.md)
+For GCP deployments, see [gcp.md](references/gcp.md)
+```
+
+### Pattern: Error Recovery
+Use for fragile operations:
+
+```
+If error "X" occurs:
+1. Check Y
+2. Try Z
+3. If still failing, see [troubleshooting.md]
+```
+
+### Pattern: Mandatory Reading Gate
+Use when context is critical:
+
+```
+**MANDATORY**: Read [api-reference.md](references/api-reference.md) 
+completely before proceeding. Do not set range limits.
+```
+```
+
+#### R1.3: Anti-Patterns
+
+```markdown
+## Anti-Patterns (Avoid These)
+
+### ❌ Explaining the Obvious
+Bad: "Python is a programming language that can be used to write scripts."
+Good: [Just show the script]
+
+### ❌ Vague Instructions
+Bad: "Handle errors appropriately"
+Good: "Catch FileNotFoundError, log path attempted, suggest checking uploads/"
+
+### ❌ Redundant Context
+Bad: Repeating information in SKILL.md AND references
+Good: Single source of truth, clear cross-references
+
+### ❌ Over-Constraining
+Bad: Specifying exact variable names for simple operations
+Good: Show example, let Claude adapt to context
+
+### ❌ Under-Constraining
+Bad: "Generate a config file" (for complex format)
+Good: Provide exact template with field descriptions
+
+### ❌ Wall of Text
+Bad: 2000-word explanation of a concept
+Good: 50-word summary + "see [deep-dive.md] for details"
+```
+
+#### R1.4: Frontmatter Best Practices
+
+```markdown
+## Writing Effective Descriptions
+
+The `description` field is the ONLY trigger mechanism. Claude reads it to decide 
+whether to load the skill.
+
+### Formula
+```
+[What it does] + [When to use it with specific triggers]
+```
+
+### Examples
+
+**Weak:**
+```yaml
+description: Helps with documents
+```
+
+**Strong:**
+```yaml
+description: >
+  Comprehensive document creation, editing, and analysis with support for 
+  tracked changes, comments, formatting preservation, and text extraction. 
+  When Claude needs to work with professional documents (.docx files) for: 
+  (1) Creating new documents, (2) Modifying or editing content, 
+  (3) Working with tracked changes, (4) Adding comments, or any other 
+  document tasks
+```
+
+### Checklist
+- [ ] Mentions specific file types/formats
+- [ ] Lists concrete trigger scenarios (numbered)
+- [ ] Uses action verbs (creating, editing, analyzing)
+- [ ] Under 1024 characters
+- [ ] No angle brackets (< or >)
+```
+
+---
+
+### R2: Pattern Library
+
+#### R2.1: Skill Archetypes
+
+```markdown
+## Skill Archetypes
+
+### Type 1: Workflow Skill
+**Use for**: Multi-step processes with clear sequence
+**Structure**: Decision tree → Step-by-step sections
+**Example**: docx (read → create → edit flows)
+
+**Template outline**:
+```
+# [Skill Name]
+## Overview (1-2 sentences)
+## Workflow Decision Tree
+## [Workflow A] (steps 1-N)
+## [Workflow B] (steps 1-N)
+## Dependencies
+```
+
+### Type 2: Tool Collection Skill
+**Use for**: Multiple related operations, no fixed sequence
+**Structure**: Quick start → Task categories
+**Example**: pdf (merge, split, extract, fill)
+
+**Template outline**:
+```
+# [Skill Name]
+## Overview
+## Quick Start (most common operation)
+## [Task Category 1]
+## [Task Category 2]
+## Reference
+```
+
+### Type 3: Guidelines Skill
+**Use for**: Standards, brand guidelines, policies
+**Structure**: Rules → Specifications → Examples
+**Example**: brand-guidelines, copywriter
+
+**Template outline**:
+```
+# [Skill Name]
+## Core Principles
+## [Guideline Category 1]
+## [Guideline Category 2]
+## Examples (good/bad pairs)
+## References
+```
+
+### Type 4: Integration Skill
+**Use for**: External API/service integration
+**Structure**: Setup → Operations → Error handling
+**Example**: mcp-builder, bigquery
+
+**Template outline**:
+```
+# [Skill Name]
+## Overview
+## Authentication/Setup
+## Core Operations
+## Error Handling
+## API Reference (link to references/)
+```
+```
+
+#### R2.2: Resource Patterns
+
+```markdown
+## Resource Organization
+
+### scripts/
+Executable code for deterministic operations. **Prefer TypeScript (`npx tsx`)**.
+
+**When to create a script**:
+- Same code rewritten repeatedly
+- Deterministic output required
+- Complex parsing/transformation
+- Error-prone manual process
+
+**Script requirements**:
+- TypeScript preferred, Python when ecosystem is better
+- Clear usage docblock at top
+- Typed arguments (TypeScript) or argparse (Python)
+- Error handling with clear messages
+- Exit codes (0 success, 1 failure)
+
+**Language selection**:
+| Task | Recommended | Reason |
+|------|-------------|--------|
+| YAML/JSON parsing | TypeScript | Native support |
+| File system ops | TypeScript | fs/path work well |
+| API calls | TypeScript | fetch, type safety |
+| XML/HTML parsing | Python | lxml, BeautifulSoup superior |
+| PDF manipulation | Python | pypdf, pdfplumber |
+| DOCX internals | Python | lxml for OOXML |
+
+### references/
+Documentation loaded into context on demand.
+
+**When to create a reference**:
+- Detailed API documentation
+- Domain-specific schemas
+- Comprehensive examples
+- Information > 100 lines
+
+**Reference requirements**:
+- Table of contents for files > 100 lines
+- Clear section headers for grep-ability
+- No duplication with SKILL.md
+- Explicit loading instructions in SKILL.md
+
+### assets/
+Files used in output, not loaded into context.
+
+**When to create an asset**:
+- Templates (pptx, docx, html)
+- Images, fonts, icons
+- Boilerplate project directories
+- Sample data files
+```
+
+---
+
+### R3: Quality Rubric
+
+#### R3.1: Scoring Dimensions
+
+```markdown
+## Quality Scoring (0-100)
+
+### Dimension 1: Trigger Accuracy (25 points)
+Does the skill activate for the right queries?
+
+| Score | Criteria |
+|-------|----------|
+| 25 | Description covers all use cases with specific triggers |
+| 20 | Description covers most use cases |
+| 15 | Description is generic but functional |
+| 10 | Description misses key use cases |
+| 0 | Description is misleading or too vague |
+
+### Dimension 2: Instruction Clarity (25 points)
+Can Claude follow the instructions without ambiguity?
+
+| Score | Criteria |
+|-------|----------|
+| 25 | Clear decision trees, concrete examples, no ambiguity |
+| 20 | Mostly clear, minor ambiguities |
+| 15 | Understandable but requires inference |
+| 10 | Significant ambiguity or missing steps |
+| 0 | Confusing or contradictory instructions |
+
+### Dimension 3: Token Efficiency (25 points)
+Does every token justify its cost?
+
+| Score | Criteria |
+|-------|----------|
+| 25 | Minimal, no redundancy, perfect progressive disclosure |
+| 20 | Lean with minor redundancy |
+| 15 | Some unnecessary explanation |
+| 10 | Significant bloat or duplication |
+| 0 | Excessive verbosity, duplicate content |
+
+### Dimension 4: Completeness (25 points)
+Does the skill handle edge cases and errors?
+
+| Score | Criteria |
+|-------|----------|
+| 25 | All workflows covered, error handling, dependencies listed |
+| 20 | Main workflows covered, basic error handling |
+| 15 | Core functionality only |
+| 10 | Missing important workflows |
+| 0 | Incomplete or broken |
+```
+
+#### R3.2: Automated Checks
+
+```markdown
+## Automated Validation Checks
+
+### Structure Checks
+- [ ] SKILL.md exists
+- [ ] Valid YAML frontmatter
+- [ ] name field present and valid (hyphen-case, ≤64 chars)
+- [ ] description field present (≤1024 chars, no angle brackets)
+- [ ] No unexpected frontmatter fields
+
+### Content Checks
+- [ ] SKILL.md under 500 lines
+- [ ] No TODO placeholders remaining
+- [ ] All referenced files exist
+- [ ] No duplicate content between SKILL.md and references
+- [ ] Scripts are executable (have shebang)
+
+### Quality Checks
+- [ ] Description includes specific trigger scenarios
+- [ ] Decision tree or workflow present (for workflow skills)
+- [ ] Examples provided for output formats
+- [ ] Error handling documented
+- [ ] Dependencies listed
+```
+
+---
+
+### R4: Analysis Tools
+
+#### R4.1: Script Language Selection
+
+```markdown
+## Script Language Guidelines
+
+**Default: TypeScript (npx tsx)**
+- Preferred for all new scripts
+- Better type safety and IDE support
+- Consistent with MCP ecosystem
+- Run with: `npx tsx scripts/script-name.ts`
+
+**Use Python when**:
+- Heavy text/XML processing (lxml, BeautifulSoup)
+- Complex PDF manipulation (pypdf, pdfplumber)
+- Scientific computing (numpy, pandas)
+- Existing Python ecosystem is significantly better
+
+**Decision tree**:
+1. Can TypeScript do it reasonably? → Use TypeScript
+2. Does Python have a significantly better library? → Use Python
+3. Is it XML/HTML heavy parsing? → Consider Python (lxml)
+4. Is it file format manipulation (PDF, DOCX internals)? → Consider Python
+```
+
+#### R4.2: Skill Analyzer Script
+
+```typescript
+// scripts/analyze-skill.ts
+/**
+ * Analyze a skill and provide quality score with recommendations.
+ *
+ * Usage:
+ *   npx tsx scripts/analyze-skill.ts <skill-path>
+ *
+ * Output:
+ *   - Quality score (0-100)
+ *   - Dimension breakdown
+ *   - Specific issues found
+ *   - Improvement recommendations
+ */
+```
+
+**Functionality**:
+1. Parse SKILL.md frontmatter and body
+2. Check all validation rules
+3. Compute scores for each dimension
+4. Generate actionable recommendations
+5. Output structured report
+
+#### R4.3: Skill Comparator Script
+
+```typescript
+// scripts/compare-skills.ts
+/**
+ * Compare a skill against high-quality reference skills.
+ *
+ * Usage:
+ *   npx tsx scripts/compare-skills.ts <skill-path> [--reference <ref-skill>]
+ *
+ * Output:
+ *   - Pattern differences
+ *   - Missing elements
+ *   - Suggestions based on reference
+ */
+```
+
+#### R4.4: Token Counter Script
+
+```typescript
+// scripts/count-tokens.ts
+/**
+ * Count tokens in skill components to identify bloat.
+ *
+ * Usage:
+ *   npx tsx scripts/count-tokens.ts <skill-path>
+ *
+ * Output:
+ *   - Token count per file
+ *   - Total context cost
+ *   - Recommendations for reduction
+ */
+```
+
+---
+
+### R5: Iterative Refinement Workflow
+
+```markdown
+## Refinement Loop
+
+### Step 1: Create Initial Skill
+Use creation workflow (Discovery → Implement)
+
+### Step 2: Validate
+Run: `npx tsx scripts/analyze-skill.ts <skill-path>`
+
+### Step 3: Test with Real Queries
+Try 3-5 realistic queries that should trigger the skill:
+- Does it trigger correctly?
+- Does Claude follow the workflow?
+- Is the output correct?
+
+### Step 4: Identify Issues
+Common issues:
+- **Doesn't trigger**: Improve description with more specific triggers
+- **Wrong workflow**: Add clearer decision tree
+- **Incorrect output**: Add examples or stricter templates
+- **Too verbose**: Move content to references
+
+### Step 5: Refine
+Make targeted changes based on issues.
+
+### Step 6: Re-validate
+Run analyzer again, compare scores.
+
+### Step 7: Package
+When score ≥ 80 and tests pass:
+`npx tsx scripts/package-skill.ts <skill-path>`
+```
+
+---
+
+## File Structure
+
+### skill-architect
+
+```
+skill-architect/
+├── SKILL.md                          # Main entry point (~400 lines)
+├── scripts/
+│   ├── init-skill.ts                 # Initialize new skill
+│   ├── analyze-skill.ts              # Quality analysis
+│   ├── compare-skills.ts             # Compare against references
+│   ├── count-tokens.ts               # Token usage analysis
+│   ├── package-skill.ts              # Package for distribution
+│   └── validate-skill.ts             # Validation checks
+├── references/
+│   ├── instruction-patterns.md       # Full pattern library
+│   ├── anti-patterns.md              # Common mistakes
+│   ├── archetypes.md                 # Skill type templates
+│   ├── quality-rubric.md             # Detailed scoring guide
+│   ├── subagent-integration.md       # When/how to delegate to subagents
+│   ├── examples/                     # Annotated skill examples
+│   │   ├── workflow-skill.md         # docx-style example
+│   │   ├── tool-collection.md        # pdf-style example
+│   │   ├── guidelines-skill.md       # copywriter-style example
+│   │   └── integration-skill.md      # mcp-builder-style example
+│   └── prompting-guide.md            # Deep dive on LLM instructions
+└── assets/
+    └── templates/
+        ├── workflow-template.md      # Starter for workflow skills
+        ├── tools-template.md         # Starter for tool skills
+        ├── guidelines-template.md    # Starter for guideline skills
+        └── integration-template.md   # Starter for integration skills
+```
+
+### agent-architect
+
+```
+agent-architect/
+├── SKILL.md                          # Main entry point (~300 lines)
+├── scripts/
+│   ├── init-agent.ts                 # Initialize new subagent
+│   ├── analyze-agent.ts              # Agent quality analysis
+│   ├── list-agents.ts                # List all available agents
+│   └── validate-agent.ts             # Validation checks
+├── references/
+│   ├── tool-selection.md             # Detailed tool access guide
+│   ├── orchestration-patterns.md     # Multi-agent workflow patterns
+│   ├── system-prompt-guide.md        # Writing effective agent prompts
+│   ├── anti-patterns.md              # Common agent design mistakes
+│   └── examples/                     # Annotated agent examples
+│       ├── code-reviewer.md          # Review specialist
+│       ├── implementer.md            # Code writer
+│       ├── researcher.md             # Read-only research agent
+│       └── validator.md              # Minimal validation agent
+└── assets/
+    └── templates/
+        ├── specialist-template.md    # Focused single-task agent
+        ├── reviewer-template.md      # Code/content review agent
+        ├── researcher-template.md    # Read-only research agent
+        └── pipeline-template.md      # Sequential workflow agent
+```
+
+### Shared Subagents (installed by both skills)
+
+```
+.claude/agents/
+├── skill-validator.md                # Validates skills (used by skill-architect)
+├── agent-validator.md                # Validates agents (used by agent-architect)
+├── token-analyzer.md                 # Analyzes token usage (shared)
+└── pattern-matcher.md                # Matches against known patterns (shared)
+```
+
+These subagents reduce context bloat by running analysis in isolated contexts.
+
+---
+
+## SKILL.md Outline
+
+```markdown
+---
+name: skill-architect
+description: >
+  Expert system for creating high-quality Claude skills. Use when: 
+  (1) Creating new skills from scratch, (2) Analyzing/improving existing 
+  skills, (3) Learning skill design best practices, (4) Debugging why a 
+  skill underperforms. Includes instruction writing patterns, quality 
+  rubrics, and iterative refinement workflows.
+---
+
+# Skill Architect
+
+Expert system for creating high-quality Claude skills.
+
+## Quick Start
+
+[Decision tree for common entry points]
+
+## Creation Workflow
+
+[Six phases: Discovery → Iterate]
+
+## Instruction Writing Principles
+
+[Core principles summary - details in references/prompting-guide.md]
+
+## Skill Archetypes
+
+[Quick reference table - details in references/archetypes.md]
+
+## Quality Standards
+
+[Score thresholds - details in references/quality-rubric.md]
+
+## Scripts Reference
+
+[Usage for each script]
+
+## Common Issues & Solutions
+
+[Troubleshooting guide]
+```
+
+---
+
+## Success Criteria
+
+### skill-architect
+
+1. **Creation**: User can create a new skill scoring ≥80 on first attempt
+2. **Analysis**: Analyzer identifies real issues with actionable fixes
+3. **Learning**: References provide clear guidance without overwhelming
+4. **Efficiency**: SKILL.md stays under 500 lines, loads fast
+5. **Self-improvement**: Skill-architect itself scores ≥90 on its own rubric
+6. **Delegation**: Heavy analysis runs in subagents, not main context
+
+### agent-architect
+
+1. **Creation**: User can create a functional subagent in <5 minutes
+2. **Tool selection**: Guide produces appropriate tool whitelists
+3. **Orchestration**: Patterns enable multi-agent workflows
+4. **Context efficiency**: Subagents return concise, structured results
+5. **Integration**: Works seamlessly with skill-architect
+
+---
+
+## Implementation Notes
+
+### Priority Order
+
+**Phase 1: skill-architect core**
+1. Core SKILL.md with creation workflow
+2. `init-skill.ts` and `validate-skill.ts` scripts
+3. `references/prompting-guide.md` (instruction best practices)
+4. `references/quality-rubric.md` (scoring system)
+
+**Phase 2: skill-architect analysis**
+5. `analyze-skill.ts` script
+6. Remaining references and templates
+7. `package-skill.ts` script
+
+**Phase 3: agent-architect**
+8. Core SKILL.md with agent creation workflow
+9. `init-agent.ts` and `validate-agent.ts` scripts
+10. `references/tool-selection.md` and `references/orchestration-patterns.md`
+11. Example agents and templates
+
+**Phase 4: Integration**
+12. Shared subagents (`skill-validator.md`, `token-analyzer.md`)
+13. Cross-references between skills
+14. Integration testing
+
+### Dependencies
+
+- Node.js 18+ with tsx (`npx tsx`)
+- TypeScript libraries: `yaml`, `gray-matter`, `tiktoken` (optional)
+- Python 3.8+ (fallback for XML/PDF processing where better suited)
+
+### Testing
+
+**skill-architect tests:**
+- Create test skills for each archetype
+- Validate scoring accuracy
+- Test trigger matching
+
+**agent-architect tests:**
+- Create agents with different tool sets
+- Test auto-delegation matching
+- Verify parallel execution
+- Measure context efficiency (main context size before/after delegation)
+
+---
+
+## Context Efficiency Guidelines
+
+### When to Delegate to Subagents
+
+| Operation | Main Context | Subagent | Reason |
+|-----------|--------------|----------|--------|
+| Simple validation | ✓ | | Fast, minimal output |
+| Deep file analysis | | ✓ | Token-heavy exploration |
+| Multi-file search | | ✓ | Lots of intermediate results |
+| Quality scoring | | ✓ | Reads entire skill into context |
+| Template application | ✓ | | Direct file creation |
+| Parallel checks | | ✓ | Run style/security/tests together |
+
+### Subagent Output Format
+
+Always specify structured output in subagent system prompts:
+
+```markdown
+Return results as JSON:
+{
+  "summary": "One-line finding",
+  "score": 85,
+  "issues": [
+    {"severity": "high", "location": "line 42", "message": "..."}
+  ],
+  "recommendations": ["..."]
+}
+```
+
+This ensures the orchestrator receives minimal, actionable data.
