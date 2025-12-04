@@ -50,6 +50,24 @@ Explains concepts in simple terms, like you're explaining to a 5-year-old.
 
 **Usage:** `/eli5 what is a database?`
 
+### Skills: skill-architect & agent-architect
+
+**Location:** `.opencode/skills/skill-architect/` and `.opencode/skills/agent-architect/`
+
+Meta-skills for creating new skills and agents. Use `@skill-analyzer` subagent for deep analysis without context bloat.
+
+**Usage:**
+```bash
+# Create a new skill
+npx tsx .opencode/skills/skill-architect/scripts/init.ts my-tool
+
+# Create a new agent
+npx tsx .opencode/skills/agent-architect/scripts/init.ts my-reviewer
+
+# Validate
+npx tsx .opencode/skills/skill-architect/scripts/validate.ts .opencode/skills/my-tool
+```
+
 ### Skill: weather
 
 **Location:** `.opencode/skills/weather/`
