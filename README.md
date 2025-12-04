@@ -13,6 +13,7 @@ The `opencode.json` enables the [opencode-skills](https://github.com/malhashemi/
   "tools": {
     "skills_*": false,
     "skills_weather": true,
+    "skills_copywriting": true,
     "skills_prompt-engineer": true,
     "skills_agent-architect": true
   }
@@ -87,6 +88,54 @@ npx tsx .opencode/skills/agent-architect/scripts/init.ts my-reviewer
 npx tsx .opencode/skills/agent-architect/scripts/validate.ts .opencode/agent/my-reviewer.md
 ```
 
+### copywriting
+
+**Location:** `.opencode/skills/copywriting/`
+
+A real-world skill for writing high-converting copy using proven marketing frameworks. This is a complete example of a production-ready skill with workflows, references, and validation.
+
+**Frameworks included:**
+- AIDA, PAS, BAB, FAB, 4Ps, SCQA, 4Cs (copywriting formulas)
+- Schwartz's 5 Stages of Awareness
+- Cialdini's 7 Principles of Persuasion
+- StoryBrand SB7 Framework
+- Harry Dry's Three Rules (Visualize, Falsify, Unique)
+- 4U's Headline Scoring
+
+**Structure:**
+```
+copywriting/
+├── SKILL.md                    # Decision tree + workflows
+├── references/
+│   ├── formulas.md             # All 7 copywriting formulas
+│   ├── awareness.md            # Schwartz's 5 stages
+│   ├── persuasion.md           # Cialdini's principles
+│   ├── positioning.md          # StoryBrand, Three Rules
+│   └── validation.md           # 4U's, checklist, red flags
+└── scripts/
+    └── validate-copy.ts        # CLI quality validation
+```
+
+**Usage:**
+```bash
+# Validate copy quality
+npx tsx .opencode/skills/copywriting/scripts/validate-copy.ts "Your headline here"
+
+# Or invoke via the copywriter agent
+@copywriter Write a headline for a project management tool
+```
+
+**Example output:**
+```
+Copy: "Replace stand-ups with a 1-page live plan."
+
+Framework: PAS (Problem → Agitate → Solution)
+Startup founders are problem-aware, so PAS names the pain quickly
+and presents a concrete solution.
+
+Validation: Score 3.3/4 — passed with no red flags.
+```
+
 ### weather
 
 **Location:** `.opencode/skills/weather/`
@@ -112,9 +161,17 @@ A read-only codebase explorer. Ask questions about the codebase without making c
 
 **Location:** `.opencode/agent/copywriter.md`
 
-Writes user-facing copy (headlines, descriptions, CTAs).
+Writes user-facing copy using proven marketing frameworks. Works with the `copywriting` skill to apply formulas like AIDA, PAS, and StoryBrand, then validates output quality.
 
 **Usage:** Type `@copywriter write a headline for our new feature`
+
+**What it does:**
+1. Loads the copywriting skill with frameworks
+2. Assesses audience awareness level (for headlines/long-form)
+3. Selects appropriate formula
+4. Generates copy
+5. Validates with the 4U's scoring
+6. Explains which framework was used and why
 
 ## Commands
 
@@ -172,6 +229,7 @@ By default, skills are disabled (`skills_*: false`). Enable specific skills:
   "tools": {
     "skills_*": false,
     "skills_weather": true,
+    "skills_copywriting": true,
     "skills_prompt-engineer": true,
     "skills_agent-architect": true
   }

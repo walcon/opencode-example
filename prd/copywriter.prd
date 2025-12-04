@@ -1,0 +1,493 @@
+# Copywriting & Marketing Frameworks PRD
+
+> **Purpose:** Reference document for creating specialized AI sub-agents for copywriting and marketing tasks.
+
+---
+
+## Table of Contents
+
+1. [Core Copywriting Formulas](#1-core-copywriting-formulas)
+2. [Customer Awareness Framework](#2-customer-awareness-framework)
+3. [Persuasion Psychology](#3-persuasion-psychology)
+4. [Messaging & Positioning](#4-messaging--positioning)
+5. [Quality Validation](#5-quality-validation)
+6. [Sub-Agent Architecture](#6-sub-agent-architecture)
+7. [References](#7-references)
+
+---
+
+## 1. Core Copywriting Formulas
+
+### 1.1 AIDA (Attention → Interest → Desire → Action)
+
+The foundational framework dating back to 1898 (Elias St. Elmo Lewis).
+
+| Stage | Goal | Techniques |
+|-------|------|------------|
+| **Attention** | Stop the scroll | Bold headlines, questions, shocking stats, pattern interrupts |
+| **Interest** | Build curiosity | Benefits, stories, relevant facts, "what's in it for me" |
+| **Desire** | Create want | Social proof, transformation stories, FOMO, emotional triggers |
+| **Action** | Drive conversion | Clear CTA, urgency, risk reversal, friction removal |
+
+**Best for:** Long-form sales pages, email sequences, video scripts, comprehensive campaigns.
+
+---
+
+### 1.2 PAS (Problem → Agitate → Solution)
+
+The negative-first emotional trigger framework.
+
+| Stage | Goal | Techniques |
+|-------|------|------------|
+| **Problem** | Name the pain | Identify specific frustration the reader experiences |
+| **Agitate** | Amplify emotion | Make the pain visceral—consequences, costs, embarrassment |
+| **Solution** | Present the cure | Position your offer as the obvious answer |
+
+**Best for:** Short-form copy, ads, email subject lines, landing page heroes.
+
+**Example:**
+- Problem: "Spending hours on marketing copy that doesn't convert?"
+- Agitate: "Every failed campaign costs you leads, revenue, and credibility."
+- Solution: "Our AI writes high-converting copy in seconds."
+
+---
+
+### 1.3 BAB (Before → After → Bridge)
+
+The transformation-focused framework.
+
+| Stage | Goal | Techniques |
+|-------|------|------------|
+| **Before** | Current state (pain) | Paint the problem world vividly |
+| **After** | Future state (gain) | Show the transformed outcome |
+| **Bridge** | Your solution | Connect the two with your product/service |
+
+**Best for:** Instagram, visual platforms, product descriptions, testimonial structure.
+
+---
+
+### 1.4 FAB (Features → Advantages → Benefits)
+
+The product-to-customer translator.
+
+| Stage | Goal | Example |
+|-------|------|---------|
+| **Features** | What it has | "5GB storage" |
+| **Advantages** | Why it matters | "Stores more than any competitor" |
+| **Benefits** | What you get | "1000 songs in your pocket" |
+
+**Best for:** Product pages, spec sheets, feature announcements.
+
+**Key principle:** Always end on the benefit. Features tell, benefits sell.
+
+---
+
+### 1.5 4Ps (Promise → Picture → Proof → Push)
+
+Extended persuasion sequence.
+
+| Stage | Goal | Techniques |
+|-------|------|------------|
+| **Promise** | Hook with outcome | Lead with the transformation |
+| **Picture** | Visualize success | Paint vivid future state |
+| **Proof** | Build credibility | Stats, testimonials, case studies |
+| **Push** | Call to action | Create urgency, remove friction |
+
+**Best for:** Sales pages, webinar scripts, infomercials.
+
+---
+
+### 1.6 SCQA (Situation → Complication → Question → Answer)
+
+The consultant's framework (McKinsey origins).
+
+| Stage | Goal | Example |
+|-------|------|---------|
+| **Situation** | Establish context | "Most teams use 5+ tools for marketing" |
+| **Complication** | Introduce problem | "But integration failures lose 20% of data" |
+| **Question** | Frame the inquiry | "How do you unify your stack?" |
+| **Answer** | Present solution | "One platform that does it all" |
+
+**Best for:** LinkedIn, B2B content, presentations, executive summaries.
+
+---
+
+### 1.7 The 4 Cs (Clear → Concise → Compelling → Credible)
+
+Quality checklist, not a sequence.
+
+| Element | Test Question |
+|---------|---------------|
+| **Clear** | Can a 12-year-old understand it? |
+| **Concise** | Can any word be cut? |
+| **Compelling** | Does it make you want to act? |
+| **Credible** | Can you prove every claim? |
+
+---
+
+## 2. Customer Awareness Framework
+
+### Eugene Schwartz's 5 Stages of Awareness
+
+From *Breakthrough Advertising* (1966)—still the gold standard.
+
+| Stage | Customer State | Headline Strategy |
+|-------|---------------|-------------------|
+| **Unaware** | Doesn't know they have a problem | Lead with emotion/identity, not product |
+| **Problem-Aware** | Knows the pain, not the solution | Agitate the problem, hint at solution |
+| **Solution-Aware** | Knows solutions exist, not yours | Differentiate your approach |
+| **Product-Aware** | Knows your product, needs convincing | Features, benefits, comparisons |
+| **Most Aware** | Ready to buy, needs a nudge | Price, offer, urgency, guarantee |
+
+**Key insight:** Copy length increases as awareness decreases. Most-aware needs a button. Unaware needs education.
+
+### Headline Strategies by Awareness Level
+
+```
+Unaware:      "Are you tired of feeling invisible in meetings?"
+Problem:      "Why your best ideas never get heard"
+Solution:     "3 communication frameworks executives use"
+Product:      "How SpeakUp Pro helps you command any room"
+Most Aware:   "SpeakUp Pro—50% off this week only"
+```
+
+---
+
+## 3. Persuasion Psychology
+
+### 3.1 Cialdini's 7 Principles of Influence
+
+From *Influence: The Psychology of Persuasion* (1984, updated 2021).
+
+| Principle | Definition | Marketing Application |
+|-----------|------------|----------------------|
+| **Reciprocity** | We repay what we receive | Free value first (guides, tools, samples) |
+| **Commitment** | We honor what we've said | Micro-commitments, quizzes, email opt-ins |
+| **Social Proof** | We follow the crowd | Testimonials, user counts, reviews |
+| **Authority** | We trust experts | Credentials, media mentions, certifications |
+| **Liking** | We buy from people we like | Personality, storytelling, relatability |
+| **Scarcity** | We want what's rare | Limited time/quantity, exclusivity |
+| **Unity** | We favor our "tribe" | Shared identity, insider language, community |
+
+### Application Matrix
+
+| Principle | Copy Element |
+|-----------|-------------|
+| Reciprocity | Lead magnets, free tools, ungated content |
+| Commitment | "Yes" ladders, quiz funnels, micro-CTAs |
+| Social Proof | "Join 50,000+ marketers", testimonials, logos |
+| Authority | "Featured in Forbes", certifications, data |
+| Liking | Founder stories, behind-the-scenes, humor |
+| Scarcity | Countdown timers, "only 3 left", waitlists |
+| Unity | "For developers, by developers", community |
+
+---
+
+### 3.2 Emotional Triggers
+
+Core emotions that drive action:
+
+| Emotion | Trigger Phrases |
+|---------|----------------|
+| **Fear** | "Don't miss out", "What if you're wrong?", "Protect yourself" |
+| **Greed** | "Double your income", "Exclusive access", "Unfair advantage" |
+| **Guilt** | "You deserve better", "Stop settling", "Owe it to yourself" |
+| **Pride** | "Be the expert", "Impress your boss", "Stand out" |
+| **Belonging** | "Join the movement", "You're one of us", "Be part of" |
+
+---
+
+## 4. Messaging & Positioning
+
+### 4.1 Harry Dry's Three Rules
+
+From Marketing Examples—apply to every line of copy.
+
+| Rule | Test | Fail → Pass |
+|------|------|-------------|
+| **Visualize** | Can you see it? | "Transform your workflow" → "From couch to 5K" |
+| **Falsify** | Is it provable? | "High quality" → "Handstitched in Vermont since 1923" |
+| **Unique** | Could a competitor say it? | "The better solution" → "1000 songs in your pocket" |
+
+**Validation:** 3 yeses = ship. Any no = rewrite.
+
+### Zoom-In Technique (Abstract → Concrete)
+
+```
+"Improve productivity"
+  → What kind?
+"Help teams work faster"
+  → How specifically?
+"Reduce meeting time"
+  → By how much?
+"Cut meetings by 50%"
+  → Proof?
+"Average user saves 4 hours/week"
+```
+
+### Point, Don't Talk (Replace adjectives with proof)
+
+| Don't Say | Do Say |
+|-----------|--------|
+| "High quality" | "Handmade in Vermont" |
+| "Fast" | "0-60 in 3.1 seconds" |
+| "Popular" | "17 of 20 teens choose Apple" |
+| "Experienced" | "20 years as a postman" |
+
+---
+
+### 4.2 StoryBrand Framework (Donald Miller)
+
+The SB7 Framework—position customer as hero, brand as guide.
+
+| Element | Role | Question to Answer |
+|---------|------|-------------------|
+| **1. Character** | Hero (customer) | What do they want? |
+| **2. Problem** | External, Internal, Philosophical | What's blocking them? |
+| **3. Guide** | Your brand | Why can you help? (Empathy + Authority) |
+| **4. Plan** | 3-step process | How do they succeed? |
+| **5. Call to Action** | Direct + Transitional | What should they do? |
+| **6. Failure** | Stakes | What if they don't act? |
+| **7. Success** | Transformation | What does winning look like? |
+
+**Core principle:** "If you confuse, you lose."
+
+### StoryBrand One-Liner Formula
+
+```
+[Problem] + [Solution] + [Result]
+
+"Most businesses struggle to explain what they do. We help you clarify 
+your message. So customers actually listen."
+```
+
+---
+
+### 4.3 Conflict Types in Copy
+
+Every good copy has a "but"—use contrast to create meaning.
+
+| Type | Structure | Example |
+|------|-----------|---------|
+| **Before/After** | Pain state → Gain state | "Couch → 5K" |
+| **Problem/Solution** | Issue → Answer | "Meetings too long → Async video" |
+| **Us/Them** | Old way → New way | "Throw money at ads vs. Learn copywriting" |
+| **Expectation/Reality** | Common belief → Surprise | "Dating app designed to be deleted" |
+| **Enemy** | Competitor/category → Hero | "They don't write songs about Volvos" |
+
+---
+
+### 4.4 Positioning Canvas
+
+Fill this out for any product/campaign:
+
+```
+FOR: [Target customer]
+WHO: [Has this problem/need]
+WE ARE: [Category/frame]
+THAT: [Key benefit/difference]
+UNLIKE: [Competitor/old way]
+WE: [Proof point/unique capability]
+
+ONE-LINER: ________________________________
+```
+
+**Tests:**
+- T-shirt test: Would you print this on a shirt?
+- One Mississippi: Understood in under 2 seconds?
+- Competitor test: Could they sign this ad?
+
+---
+
+## 5. Quality Validation
+
+### 5.1 The 4U's Headline Formula
+
+Developed by Michael Masterson (AWAI).
+
+| Element | Definition | Example |
+|---------|------------|---------|
+| **Useful** | Shows benefit | "How to write headlines that convert" |
+| **Urgent** | Creates time pressure | "Before your next launch" |
+| **Unique** | Differentiates | "The counterintuitive approach" |
+| **Ultra-specific** | Provides details | "7 formulas with 23 examples" |
+
+**Scoring:** Rate 1-4 for each. Target: 3.5+ average.
+
+---
+
+### 5.2 Copy Review Checklist
+
+Before shipping any copy:
+
+```
+□ One Mississippi test (understood in <2 seconds?)
+□ Every line visualizable (concrete, not abstract?)
+□ Every claim falsifiable (provable, not adjective soup?)
+□ Competitor couldn't sign it (unique angle?)
+□ Kaplan's Law applied (every word earns its place?)
+□ No paragraph >2 lines
+□ First line hooks to second (curiosity → payoff)
+□ Reviewed in context (mocked up where it lives)
+□ Word count reduced: Started ___ → Ended ___
+```
+
+### Red Flag Words (Automatic rewrite needed)
+
+| Red Flag | Problem |
+|----------|---------|
+| "Innovative solution" | Abstract, unfalsifiable |
+| "Best in class" | Generic, competitor could say it |
+| "Seamless experience" | Can't visualize |
+| "Transform your..." | Abstract verb |
+| "Cutting-edge" | Meaningless buzzword |
+| Multiple adjectives | Hiding weak nouns |
+| "And" 3+ times | Scope creep |
+
+---
+
+## 6. Sub-Agent Architecture
+
+### Recommended Agent Types
+
+| Agent | Purpose | Primary Frameworks |
+|-------|---------|-------------------|
+| **Headline Agent** | Generate/test headlines | 4U's, Three Rules, Awareness Stages |
+| **Sales Copy Agent** | Long-form persuasion | AIDA, 4Ps, StoryBrand |
+| **Ad Copy Agent** | Short-form conversion | PAS, BAB, Conflict Types |
+| **Email Agent** | Sequences and campaigns | AIDA, PAS, Awareness Stages |
+| **Positioning Agent** | Brand messaging strategy | Three Rules, Positioning Canvas, StoryBrand |
+| **Review Agent** | Quality validation | Checklist, 4U's, Three Rules |
+| **Awareness Agent** | Audience analysis | Schwartz 5 Stages, Cialdini Principles |
+
+### Agent Workflow
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                         INPUT                                │
+│         (Brief, Product, Audience, Channel, Goal)           │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   AWARENESS AGENT                            │
+│  • Determine customer awareness stage                        │
+│  • Identify relevant Cialdini principles                     │
+│  • Map emotional triggers                                    │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                  POSITIONING AGENT                           │
+│  • Extract "Only We" angle                                   │
+│  • Identify enemy/conflict                                   │
+│  • Zoom abstract → concrete                                  │
+│  • Generate positioning statement                            │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│              COPY GENERATION AGENT(S)                        │
+│  • Headline Agent (multiple variants)                        │
+│  • Body Copy Agent (framework-specific)                      │
+│  • CTA Agent                                                 │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    REVIEW AGENT                              │
+│  • Three Rules validation                                    │
+│  • 4U's scoring                                              │
+│  • Checklist compliance                                      │
+│  • Competitor sign test                                      │
+│  • Word count optimization                                   │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                         OUTPUT                               │
+│  • Recommended variant                                       │
+│  • Alternatives                                              │
+│  • Review notes                                              │
+│  • Refinement suggestions                                    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Agent Prompting Pattern
+
+Each agent should receive:
+
+1. **Context:** Brief, product details, audience, channel
+2. **Framework:** Which formula(s) to apply
+3. **Constraints:** Length, tone, forbidden words
+4. **Examples:** Swipe file references for calibration
+5. **Output format:** Structure for deliverable
+
+---
+
+## 7. References
+
+### Books
+
+| Title | Author | Key Concept |
+|-------|--------|-------------|
+| *Breakthrough Advertising* | Eugene Schwartz (1966) | 5 Stages of Awareness |
+| *Influence: The Psychology of Persuasion* | Robert Cialdini (1984) | 6 Principles of Persuasion |
+| *Building a StoryBrand* | Donald Miller (2017) | SB7 Framework |
+| *The Copywriter's Handbook* | Robert W. Bly | AIDA, 4U's, Headlines |
+| *Great Leads* | Michael Masterson & John Forde | Lead types, Awareness matching |
+| *Ogilvy on Advertising* | David Ogilvy (1983) | Classic direct response |
+
+### Online Resources
+
+| Resource | URL | Focus |
+|----------|-----|-------|
+| Marketing Examples | marketingexamples.com | Harry Dry's frameworks, swipe file |
+| Copyblogger | copyblogger.com | Content marketing, formulas |
+| CopyHackers | copyhackers.com | Conversion copywriting |
+| StoryBrand | storybrand.com | Messaging framework |
+| Influence at Work | influenceatwork.com | Cialdini's official site |
+| AWAI | awai.com | 4U's formula, copywriting training |
+
+### Source Articles
+
+- "From AIDA to PAS: 5 Copywriting Formulas That Work" — readstoleads.com
+- "AIDA vs PAS: My Pick on Which Formula to Use" — crazyegg.com
+- "7 Best Copywriting Frameworks" — funnelkarma.com
+- "Building a Content Strategy Based on 5 Stages of Buyer Awareness" — readstoleads.com
+- "How to Use Cialdini's 6 Principles of Persuasion to Boost Conversions" — cxl.com
+- "The StoryBrand Framework: Complete Guide" — gravityglobal.com
+- "4 U's Copywriting Formula" — instacopy.ai
+
+---
+
+## Appendix: Quick Reference Cards
+
+### Formula Selection Guide
+
+| Scenario | Recommended Formula |
+|----------|-------------------|
+| Short ad, cold audience | PAS |
+| Long sales page | AIDA or 4Ps |
+| Product feature announcement | FAB |
+| Social media post | BAB |
+| B2B/LinkedIn | SCQA |
+| Brand positioning | StoryBrand + Three Rules |
+| Headline testing | 4U's |
+| Email sequence | AIDA (spread across emails) |
+
+### Awareness → Formula Matching
+
+| Awareness Level | Best Formulas |
+|----------------|---------------|
+| Unaware | Story-led, PAS (soft problem) |
+| Problem-Aware | PAS, BAB |
+| Solution-Aware | FAB, 4Ps |
+| Product-Aware | AIDA, FAB with comparisons |
+| Most Aware | Direct CTA, offer-focused |
+
+---
+
+*Document version: 1.0*  
+*Created: December 2024*  
+*Purpose: Sub-agent framework reference*
