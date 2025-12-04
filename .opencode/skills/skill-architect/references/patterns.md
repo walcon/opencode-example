@@ -211,6 +211,98 @@ Do not set line limits when reading - you need the full context.
 
 ---
 
+## Workflow Patterns
+
+### Sequential Workflows
+
+For complex multi-step tasks, provide a numbered overview at the start of SKILL.md. This helps Claude understand the full process before diving into details:
+
+```markdown
+## Overview
+
+Processing a document involves these steps:
+
+1. Validate the input file (run validate.ts)
+2. Extract content (run extract.ts)
+3. Transform data (edit config, run transform.ts)
+4. Generate output (run generate.ts)
+5. Verify results (run verify.ts)
+
+Each step must complete successfully before proceeding to the next.
+```
+
+**Benefits:**
+- Claude sees the big picture before executing
+- Users understand what to expect
+- Makes it easy to resume after interruption
+
+### Conditional Workflows
+
+For tasks with branching logic, guide Claude through decision points explicitly:
+
+```markdown
+## Workflow
+
+1. Determine the operation type:
+
+   **Creating new content?** → Follow "Creation Workflow" below
+   **Editing existing content?** → Follow "Editing Workflow" below
+   **Deleting content?** → Follow "Deletion Workflow" below
+
+2. After completing the appropriate workflow, proceed to "Verification" section.
+
+---
+
+## Creation Workflow
+
+[Steps for creation...]
+
+---
+
+## Editing Workflow
+
+[Steps for editing...]
+```
+
+**When to use:**
+- Multiple valid paths through the skill
+- User intent determines the approach
+- Different operations share some common steps
+
+### Checkpoint Pattern
+
+For long-running or risky workflows, add explicit checkpoints:
+
+```markdown
+## Phase 1: Preparation
+
+### Steps
+1. [Step details...]
+2. [Step details...]
+
+### Checkpoint
+
+Before proceeding to Phase 2, verify:
+- [ ] All files backed up
+- [ ] Test environment configured
+- [ ] Dependencies installed
+
+If any check fails, stop and resolve before continuing.
+
+---
+
+## Phase 2: Execution
+
+[Only proceed after Phase 1 checkpoint passes...]
+```
+
+**When to use:**
+- Deployments and migrations
+- Destructive operations
+- Multi-phase processes where early failure saves time
+
+---
+
 ## Anti-Patterns
 
 ### 1. Explaining the Obvious

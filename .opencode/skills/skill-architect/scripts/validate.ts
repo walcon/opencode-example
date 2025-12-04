@@ -1,7 +1,7 @@
 #!/usr/bin/env npx tsx
 
 /**
- * Validate a skill
+ * Validate a skill against the Anthropic Skills Specification
  *
  * Usage:
  *   npx tsx scripts/validate.ts <path>
@@ -21,8 +21,20 @@ interface ValidationResult {
 interface Frontmatter {
   name?: string;
   description?: string;
+  license?: string;
+  "allowed-tools"?: string[];
+  metadata?: Record<string, unknown>;
   [key: string]: unknown;
 }
+
+// Allowed top-level frontmatter properties per Anthropic spec
+const ALLOWED_PROPERTIES = new Set([
+  "name",
+  "description",
+  "license",
+  "allowed-tools",
+  "metadata",
+]);
 
 function parseFrontmatter(content: string): {
   frontmatter: Frontmatter | null;
@@ -119,6 +131,20 @@ function validateSkill(skillPath: string): ValidationResult {
         `Name must be kebab-case (lowercase letters, numbers, hyphens only)`
       );
     }
+    // Check for consecutive hyphens
+    if (frontmatter.name.includes("--")) {
+      result.errors.push(`Name cannot contain consecutive hyphens (--)`);
+    }
+    // Check for leading/trailing hyphens
+    if (frontmatter.name.startsWith("-") || frontmatter.name.endsWith("-")) {
+      result.errors.push(`Name cannot start or end with a hyphen`);
+    }
+    // Check max length (per Anthropic spec)
+    if (frontmatter.name.length > 64) {
+      result.errors.push(
+        `Name too long (${frontmatter.name.length} chars, max 64)`
+      );
+    }
   }
 
   if (frontmatter.description) {
@@ -129,16 +155,28 @@ function validateSkill(skillPath: string): ValidationResult {
       );
     }
     if (desc.length > 1024) {
-      result.warnings.push(
-        `Description very long (${desc.length} chars, recommended < 1024)`
+      result.errors.push(
+        `Description too long (${desc.length} chars, max 1024)`
       );
     }
+    // Angle brackets are an error per Anthropic spec
     if (desc.includes("<") || desc.includes(">")) {
-      result.warnings.push("Description contains angle brackets (< or >)");
+      result.errors.push(
+        "Description cannot contain angle brackets (< or >)"
+      );
     }
     if (!/\(\d\)/.test(desc)) {
       result.warnings.push(
         'Description missing numbered trigger scenarios (e.g., "(1) Creating..., (2) Editing...")'
+      );
+    }
+  }
+
+  // Check for unexpected frontmatter properties
+  for (const key of Object.keys(frontmatter)) {
+    if (!ALLOWED_PROPERTIES.has(key)) {
+      result.errors.push(
+        `Unexpected frontmatter property: "${key}". Allowed: ${[...ALLOWED_PROPERTIES].join(", ")}`
       );
     }
   }

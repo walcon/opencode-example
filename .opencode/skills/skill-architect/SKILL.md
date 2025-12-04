@@ -162,10 +162,36 @@ description: >
 ---
 ```
 
-**Requirements:**
-- `name` must match directory name (kebab-case)
-- `description` minimum 20 characters
-- Include numbered trigger scenarios in description
+**Required fields:**
+
+| Field | Requirements |
+|-------|--------------|
+| `name` | Kebab-case, matches directory name, max 64 chars, no consecutive hyphens |
+| `description` | 20-1024 chars, no angle brackets (`<` or `>`), include numbered triggers |
+
+**Optional fields:**
+
+```yaml
+---
+name: my-skill
+description: >
+  [What it does]. Use when: (1) [Trigger 1], (2) [Trigger 2].
+license: MIT                      # License identifier
+allowed-tools:                    # Restrict which tools the skill can use
+  - read
+  - write
+  - bash
+metadata:                         # Custom metadata
+  version: "1.0"
+  author: "Team Name"
+---
+```
+
+| Field | Purpose |
+|-------|---------|
+| `license` | License identifier (e.g., "MIT", "Apache-2.0") |
+| `allowed-tools` | List of tools the skill is permitted to use |
+| `metadata` | Custom key-value pairs (version, author, etc.) |
 
 ### scripts/
 
