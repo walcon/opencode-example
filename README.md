@@ -9,7 +9,13 @@ The `opencode.json` enables the [opencode-skills](https://github.com/malhashemi/
 ```json
 {
   "$schema": "https://opencode.ai/config.json",
-  "plugin": ["opencode-skills"]
+  "plugin": ["opencode-skills"],
+  "tools": {
+    "skills_*": false,
+    "skills_weather": true,
+    "skills_prompt-engineer": true,
+    "skills_agent-architect": true
+  }
 }
 ```
 
@@ -24,7 +30,75 @@ Restart OpenCode after cloning this repo to load everything.
 | **Command** | Reusable prompt template | Type `/name` |
 | **Skill** | External tool with bundled scripts/resources | Auto-invoked as `skills_name` tool |
 
-## Examples
+## Skills
+
+### prompt-engineer
+
+**Location:** `.opencode/skills/prompt-engineer/`
+
+Create production-ready prompts using a systematic 5-phase methodology.
+
+**Phases:**
+1. Requirements Gathering (TASK, CONTEXT, OUTPUT, CONSTRAINTS, EDGE CASES)
+2. Structure Design (pattern selection)
+3. Prompt Construction (XML-tagged blocks)
+4. Validation (automated checks)
+5. Output Generation (save to `prompts/`)
+
+**Structure:**
+```
+prompt-engineer/
+├── SKILL.md                    # Core instructions
+├── references/
+│   ├── prompt-patterns.md      # PTF, COST, STAR, RRET, CoT, Few-Shot, ReAct, Constitutional
+│   ├── anti-patterns.md        # What to avoid
+│   └── evaluation-rubric.md    # Quality scoring
+├── scripts/
+│   └── validate-prompt.ts      # Validation with token counting
+└── assets/
+    └── prompt-template.md      # Ready-to-use template
+```
+
+**Usage:**
+```bash
+# Validate a prompt
+npx tsx .opencode/skills/prompt-engineer/scripts/validate-prompt.ts prompts/my-prompt.md
+```
+
+### agent-architect
+
+**Location:** `.opencode/skills/agent-architect/`
+
+Design and generate OpenCode agents with proper configuration, permissions, and MCP integration.
+
+**Features:**
+- Primary vs subagent mode selection
+- Tool permission patterns (read-only, git-scoped, package management)
+- MCP tools configuration
+- Integration with prompt-engineer for system prompts
+- Quality metrics and validation
+
+**Usage:**
+```bash
+# Create a new agent
+npx tsx .opencode/skills/agent-architect/scripts/init.ts my-reviewer
+
+# Validate an agent
+npx tsx .opencode/skills/agent-architect/scripts/validate.ts .opencode/agent/my-reviewer.md
+```
+
+### weather
+
+**Location:** `.opencode/skills/weather/`
+
+Fetches current weather using the Open-Meteo API. Demonstrates skills as executable external tools.
+
+**Usage:**
+```bash
+npx tsx .opencode/skills/weather/scripts/get-weather.ts "London"
+```
+
+## Agents
 
 ### Primary Agent: ask
 
@@ -32,124 +106,74 @@ Restart OpenCode after cloning this repo to load everything.
 
 A read-only codebase explorer. Ask questions about the codebase without making changes.
 
-**Usage:** Press `Tab` to switch to the ask agent, then ask anything about the codebase.
+**Usage:** Press `Tab` to switch to the ask agent.
 
 ### Subagent: copywriter
 
 **Location:** `.opencode/agent/copywriter.md`
 
-Writes user-facing copy (headlines, descriptions, CTAs). Demonstrates how the primary agent can delegate tasks.
+Writes user-facing copy (headlines, descriptions, CTAs).
 
-**Usage:** Type `@copywriter write a headline for our new feature` or let the primary agent spawn it for copy-related tasks.
+**Usage:** Type `@copywriter write a headline for our new feature`
 
-### Command: /eli5
+## Commands
+
+### /eli5
 
 **Location:** `.opencode/command/eli5.md`
 
-Explains concepts in simple terms, like you're explaining to a 5-year-old.
+Explains concepts in simple terms.
 
 **Usage:** `/eli5 what is a database?`
 
-### Skills: skill-architect & agent-architect
+## Output Directories
 
-**Location:** `.opencode/skills/skill-architect/` and `.opencode/skills/agent-architect/`
-
-Meta-skills for creating new skills and agents. Use `@skill-analyzer` subagent for deep analysis without context bloat.
-
-**Usage:**
-```bash
-# Create a new skill
-npx tsx .opencode/skills/skill-architect/scripts/init.ts my-tool
-
-# Create a new agent
-npx tsx .opencode/skills/agent-architect/scripts/init.ts my-reviewer
-
-# Validate
-npx tsx .opencode/skills/skill-architect/scripts/validate.ts .opencode/skills/my-tool
-```
-
-### Skill: weather
-
-**Location:** `.opencode/skills/weather/`
-
-Fetches current weather using the Open-Meteo API. Demonstrates skills as executable external tools.
-
-**Structure:**
-```
-weather/
-├── SKILL.md              # Instructions
-└── scripts/
-    └── get-weather.ts    # Executable TypeScript
-```
-
-**Usage:** The agent can invoke `skills_weather` and run the script:
-```bash
-npx tsx .opencode/skills/weather/scripts/get-weather.ts "London"
-```
+| Directory | Purpose |
+|-----------|---------|
+| `prompts/` | Generated prompts from prompt-engineer skill |
+| `.opencode/agent/` | Agent definitions |
+| `.opencode/command/` | Command definitions |
+| `.opencode/skills/` | Skill definitions |
 
 ## Documentation
 
-### Local Docs (in this repo)
+### Local Docs
 
 - [Agents](docs/agents.md) - Primary agents and subagents
 - [Commands](docs/commands.md) - Custom slash commands
 - [Skills](docs/skills.md) - External tools with the opencode-skills plugin
-- [Config](docs/config.md) - Configuration options including `reasoningEffort`
-- [Prompt Architecture](docs/prompt-architecture.md) - How OpenCode's layered prompting system works
-- [Prompts](docs/prompts/) - Actual prompt files from OpenCode (anthropic.txt, codex.txt, plan.txt, etc.)
+- [Config](docs/config.md) - Configuration options
 
 ### Official Docs
 
 - [OpenCode Docs](https://opencode.ai/docs/)
-- [Agents](https://opencode.ai/docs/agents/)
-- [Commands](https://opencode.ai/docs/commands/)
-- [Config](https://opencode.ai/docs/config/)
 - [Skills Plugin](https://github.com/malhashemi/opencode-skills)
 - [Anthropic Skills Spec](https://github.com/anthropics/skills)
 
-## Model Selection for Cost Efficiency
+## Model Selection
 
-Each agent/command can use a different model to optimize quota usage:
+Each agent/command can use a different model:
 
 | Component | Model | Rationale |
 |-----------|-------|-----------|
-| Default | `claude-opus-4.5` | Complex tasks need capability |
-| `small_model` | `claude-haiku-4.5` | Title generation, lightweight tasks |
-| ask agent | `claude-haiku-4.5` | Read-only analysis, lower cost |
-| copywriter | `gpt-5` | Creative writing benefits from GPT |
-| /eli5 command | `claude-haiku-4.5` | Simple explanations, fast & cheap |
+| Default | `claude-opus-4.5` | Complex tasks |
+| `small_model` | `claude-haiku-4.5` | Lightweight tasks |
+| ask agent | `claude-haiku-4.5` | Read-only, lower cost |
+| copywriter | `gpt-5` | Creative writing |
 
 Set models in frontmatter (`model: provider/model-name`) or in `opencode.json`.
 
-## Reasoning Effort
-
-For models that support extended thinking (like OpenAI's reasoning models), use `reasoningEffort`:
-
-```json
-{
-  "agent": {
-    "deep-thinker": {
-      "description": "Uses high reasoning for complex problems",
-      "model": "openai/gpt-5",
-      "reasoningEffort": "high"
-    }
-  }
-}
-```
-
-Values: `low`, `medium`, `high`
-
-See [docs/config.md](docs/config.md) for more details on provider-specific options.
-
 ## Controlling Skill Access
 
-By default, skills are disabled (`skills_*: false`) to prevent context pollution. Enable specific skills per-project or per-agent:
+By default, skills are disabled (`skills_*: false`). Enable specific skills:
 
 ```json
 {
   "tools": {
     "skills_*": false,
-    "skills_weather": true
+    "skills_weather": true,
+    "skills_prompt-engineer": true,
+    "skills_agent-architect": true
   }
 }
 ```
